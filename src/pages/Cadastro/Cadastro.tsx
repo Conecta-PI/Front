@@ -1,10 +1,5 @@
 import React, { useRef, useState } from "react"
-import {
-    KeyboardAvoidingView,
-    ScrollView,
-    Text,
-    View,
-} from "react-native"
+import { KeyboardAvoidingView, ScrollView, Text, View } from "react-native"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { useNavigation } from "@react-navigation/native"
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
@@ -14,8 +9,7 @@ import Header from "../../components/Header/Header"
 import Input, { InputProps } from "../../components/Input/Input"
 import Button from "../../components/Button/Button"
 import Checkbox from "../../components/Checkbox/Checkbox"
-import type { RootStackParamList } from "../../routes/Routes"
-
+import type { RootStackParamList } from "../../routes"
 type CampoProps = InputProps & {
     aoFocar: (view: View | null) => void
 }
@@ -129,6 +123,7 @@ export default function Cadastro() {
             >
                 <View style={{ paddingTop: insets.top }}>
                     <Header
+                        tipo="titulo"
                         titulo="Criar conta"
                         descricao="Cadastre-se e comece a organizar seu negócio com o Conecta."
                     />
@@ -224,11 +219,7 @@ export default function Cadastro() {
                             <View style={style.linha} />
                         </View>
 
-                        <Button
-                            texto="Já tenho conta"
-                            cor="bege-claro"
-                            onPress={jaTenhoConta}
-                        />
+                        <Button texto="Já tenho conta" cor="bege-claro" onPress={jaTenhoConta} />
                     </View>
                 </View>
             </ScrollView>

@@ -3,7 +3,7 @@ import { themes } from "../../global/themes"
 
 export const BAR_HEIGHT = 68
 export const BUTTON_SIZE = 56
-export const BUTTON_OVERFLOW = 28 // quanto o botão central "sobe" acima da barra
+export const BUTTON_OVERFLOW = 28
 export const TOTAL_HEIGHT = BAR_HEIGHT + BUTTON_OVERFLOW
 
 export const style = StyleSheet.create({
@@ -26,8 +26,6 @@ export const style = StyleSheet.create({
         paddingHorizontal: 8,
     },
 
-    // o item ocupa a altura total (inclusive a parte acima da barra),
-    // assim o botão central inteiro fica clicável no Android
     item: {
         flex: 1,
         alignItems: "center",
@@ -56,7 +54,6 @@ export const style = StyleSheet.create({
         backgroundColor: themes.colors["dourado"],
     },
 
-    // mantém o espaço reservado para não "pular" o layout
     dotOculto: {
         opacity: 0,
     },
@@ -81,5 +78,41 @@ export const style = StyleSheet.create({
 
     centerButtonPressed: {
         backgroundColor: themes.colors["dourado-pressionado"],
+    },
+
+    // ---------- variante de cobrança ----------
+    cobranca: {
+        backgroundColor: themes.colors["branco"],
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
+        paddingHorizontal: 16,
+        paddingTop: 16,
+        gap: 12,
+        elevation: 10,
+        shadowColor: "#000",
+        shadowOpacity: 0.08,
+        shadowRadius: 8,
+        shadowOffset: { width: 0, height: -2 },
+    },
+
+    cobrancaResumo: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+    },
+
+    cobrancaItens: {
+        ...themes.typography.apoio,
+        color: themes.colors["texto-secundario"],
+    },
+
+    cobrancaRotuloTotal: {
+        ...themes.typography.apoio,
+        color: themes.colors["texto-secundario"],
+    },
+
+    cobrancaTotal: {
+        ...themes.typography.titulo3,
+        color: themes.colors["texto"],
     },
 })

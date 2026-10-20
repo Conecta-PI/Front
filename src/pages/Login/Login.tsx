@@ -1,7 +1,6 @@
 import React, { useRef, useState } from "react"
 import {
     KeyboardAvoidingView,
-    Platform,
     Pressable,
     ScrollView,
     Text,
@@ -15,7 +14,7 @@ import { style } from "./style"
 import Header from "../../components/Header/Header"
 import Input from "../../components/Input/Input"
 import Button from "../../components/Button/Button"
-import type { RootStackParamList } from "../../routes/Routes"
+import type { RootStackParamList } from "../../routes"
 
 export default function Login() {
     const insets = useSafeAreaInsets()
@@ -29,14 +28,10 @@ export default function Login() {
     const [senha, setSenha] = useState("")
 
     function rolarParaFormulario() {
-        scrollRef.current?.scrollTo({
-            y: alturaHeader.current,
-            animated: true,
-        })
+        scrollRef.current?.scrollTo({ y: alturaHeader.current, animated: true })
     }
 
     function entrar() {
-
         navigation.replace("Main")
     }
 
@@ -45,14 +40,11 @@ export default function Login() {
     }
 
     function esqueciSenha() {
-
+        
     }
 
     return (
-        <KeyboardAvoidingView
-            style={style.container}
-            behavior="padding"
-        >
+        <KeyboardAvoidingView style={style.container} behavior="padding">
             <View style={[style.statusBarFundo, { height: insets.top }]} />
 
             <ScrollView
@@ -67,7 +59,7 @@ export default function Login() {
                         alturaHeader.current = e.nativeEvent.layout.height
                     }}
                 >
-                    <Header />
+                    <Header tipo="boasVindas" />
                 </View>
 
                 <View style={[style.area, { paddingBottom: 16 + insets.bottom }]}>
@@ -115,11 +107,7 @@ export default function Login() {
                             <View style={style.linha} />
                         </View>
 
-                        <Button
-                            texto="Criar conta"
-                            cor="bege-claro"
-                            onPress={criarConta}
-                        />
+                        <Button texto="Criar conta" cor="bege-claro" onPress={criarConta} />
                     </View>
                 </View>
             </ScrollView>

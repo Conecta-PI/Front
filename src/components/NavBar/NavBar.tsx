@@ -6,6 +6,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 import { style, BAR_HEIGHT, TOTAL_HEIGHT } from "./style"
 import { themes } from "../../global/themes"
+import NavBarCobranca from "./NavBarCobranca"
+import type { RodapeCobranca } from "../../contexts/NavBarContext"
 
 type IconName = React.ComponentProps<typeof Ionicons>["name"]
 
@@ -20,8 +22,16 @@ const TABS: Record<
     Mais: { label: "Mais", icon: "ellipsis-horizontal", iconAtivo: "ellipsis-horizontal" },
 }
 
-export default function NavBar({ state, navigation }: BottomTabBarProps) {
+type NavBarProps = BottomTabBarProps & {
+    cobranca?: RodapeCobranca | null
+}
+
+export default function NavBar({ state, navigation, cobranca }: NavBarProps) {
     const insets = useSafeAreaInsets()
+
+    if (cobranca) {
+        return <NavBarCobranca {...cobranca} />
+    }
 
     return (
         <View style={[style.container, { height: TOTAL_HEIGHT + insets.bottom }]}>

@@ -9,7 +9,7 @@ import {
     Poppins_600SemiBold,
 } from "@expo-google-fonts/poppins"
 
-import Routes from "./src/routes/Routes"
+import Routes from "./src/routes"
 
 export default function App() {
     const [fontsLoaded] = useFonts({
