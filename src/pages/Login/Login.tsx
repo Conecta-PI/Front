@@ -36,16 +36,16 @@ export default function Login() {
     }
 
     function entrar() {
-        
+
         navigation.replace("Main")
     }
 
     function criarConta() {
-        
+        navigation.navigate("Cadastro")
     }
 
     function esqueciSenha() {
-        
+
     }
 
     return (

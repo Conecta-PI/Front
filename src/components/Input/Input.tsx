@@ -5,12 +5,59 @@ import { Ionicons } from "@expo/vector-icons"
 import { style } from "./style"
 import { themes } from "../../global/themes"
 
-export type InputTipo = "email" | "senha"
+export type InputTipo = "email" | "senha" | "texto" | "telefone"
 
-type InputProps = Omit<TextInputProps, "secureTextEntry" | "keyboardType"> & {
+export type InputProps = Omit<TextInputProps, "secureTextEntry" | "keyboardType"> & {
     tipo: InputTipo
     label?: string
     erro?: string
+}
+
+function mascaraTelefone(valor: string) {
+    const d = valor.replace(/\D/g, "").slice(0, 11)
+
+    if (d.length === 0) return ""
+    if (d.length <= 2) return `(${d}`
+    if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`
+    if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`
+    return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`
+}
+
+function propsPorTipo(tipo: InputTipo, senhaVisivel: boolean): TextInputProps {
+    switch (tipo) {
+        case "email":
+            return {
+                keyboardType: "email-address",
+                autoCapitalize: "none",
+                autoCorrect: false,
+                autoComplete: "email",
+                textContentType: "emailAddress",
+            }
+
+        case "senha":
+            return {
+                secureTextEntry: !senhaVisivel,
+                autoCapitalize: "none",
+                autoCorrect: false,
+                autoComplete: "password",
+                textContentType: "password",
+            }
+
+        case "telefone":
+            return {
+                keyboardType: "phone-pad",
+                autoComplete: "tel",
+                textContentType: "telephoneNumber",
+                maxLength: 15,
+            }
+
+        case "texto":
+        default:
+            return {
+                keyboardType: "default",
+                autoCapitalize: "words",
+            }
+    }
 }
 
 export default function Input({
@@ -19,29 +66,13 @@ export default function Input({
     erro,
     onFocus,
     onBlur,
+    onChangeText,
     ...rest
 }: InputProps) {
     const [focado, setFocado] = useState(false)
     const [senhaVisivel, setSenhaVisivel] = useState(false)
 
     const isSenha = tipo === "senha"
-
-    const propsPorTipo: TextInputProps =
-        tipo === "email"
-            ? {
-                  keyboardType: "email-address",
-                  autoCapitalize: "none",
-                  autoCorrect: false,
-                  autoComplete: "email",
-                  textContentType: "emailAddress",
-              }
-            : {
-                  secureTextEntry: !senhaVisivel,
-                  autoCapitalize: "none",
-                  autoCorrect: false,
-                  autoComplete: "password",
-                  textContentType: "password",
-              }
 
     return (
         <View style={style.container}>
@@ -65,7 +96,10 @@ export default function Input({
                         setFocado(false)
                         onBlur?.(e)
                     }}
-                    {...propsPorTipo}
+                    onChangeText={(texto) =>
+                        onChangeText?.(tipo === "telefone" ? mascaraTelefone(texto) : texto)
+                    }
+                    {...propsPorTipo(tipo, senhaVisivel)}
                     {...rest}
                 />
 

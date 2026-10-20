@@ -11,9 +11,11 @@ import Produtos from "../pages/Produtos/Produtos"
 import Cobrar from "../pages/Cobrar/Cobrar"
 import Pedidos from "../pages/Pedidos/Pedidos"
 import Mais from "../pages/Mais/Mais"
+import Cadastro from "../pages/Cadastro/Cadastro"
 
 export type RootStackParamList = {
     Login: undefined
+    Cadastro: undefined
     Main: undefined
 }
 
@@ -53,6 +55,7 @@ export default function Routes() {
                 screenOptions={{ headerShown: false }}
             >
                 <Stack.Screen name="Login" component={Login} />
+                <Stack.Screen name="Cadastro" component={Cadastro} />
                 <Stack.Screen name="Main" component={MainTabs} />
             </Stack.Navigator>
         </NavigationContainer>
