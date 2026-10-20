@@ -5,7 +5,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
 
 import NavBar from "../components/NavBar/NavBar"
 
-import Login from "../pages/login/Login"
+import Login from "../pages/Login/Login"
 import Inicio from "../pages/Inicio/Inicio"
 import Produtos from "../pages/Produtos/Produtos"
 import Cobrar from "../pages/Cobrar/Cobrar"

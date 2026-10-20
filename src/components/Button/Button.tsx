@@ -1,0 +1,83 @@
+import React from "react"
+import { Pressable, PressableProps, StyleProp, Text, ViewStyle } from "react-native"
+import { Ionicons } from "@expo/vector-icons"
+
+import { style } from "./style"
+import { themes } from "../../global/themes"
+
+type IconName = React.ComponentProps<typeof Ionicons>["name"]
+type CorTema = keyof typeof themes.colors
+
+export type ButtonFormato = "quadrado" | "arredondado"
+
+type ButtonProps = Omit<PressableProps, "style" | "children"> & {
+    texto: string
+    cor?: CorTema
+    formato?: ButtonFormato
+    icone?: IconName
+    posicaoIcone?: "esquerda" | "direita"
+    corTexto?: CorTema
+    style?: StyleProp<ViewStyle>
+}
+
+const COR_PRESSIONADA: Partial<Record<CorTema, string>> = {
+    "dourado": themes.colors["dourado-pressionado"],
+    "azul-escuro": "#0E2830",
+    "bege-claro": themes.colors["campo-desabilitado"],
+    "branco": themes.colors["bege-claro"],
+    "marrom-suave": "#76523D",
+}
+
+const COR_TEXTO_PADRAO: Partial<Record<CorTema, CorTema>> = {
+    "azul-escuro": "branco",
+    "marrom-suave": "branco",
+}
+
+export default function Button({
+    texto,
+    cor = "dourado",
+    formato = "quadrado",
+    icone,
+    posicaoIcone = "esquerda",
+    corTexto,
+    disabled,
+    style: styleExterno,
+    ...rest
+}: ButtonProps) {
+    const corFundo = themes.colors[cor]
+    const corFundoPressionado = COR_PRESSIONADA[cor] ?? corFundo
+    const corConteudo =
+        themes.colors[corTexto ?? COR_TEXTO_PADRAO[cor] ?? "azul-escuro"]
+
+    const iconeEl = icone ? (
+        <Ionicons
+            name={icone}
+            size={20}
+            color={corConteudo}
+            style={posicaoIcone === "esquerda" ? style.iconeEsquerda : style.iconeDireita}
+        />
+    ) : null
+
+    return (
+        <Pressable
+            disabled={disabled}
+            accessibilityRole="button"
+            accessibilityLabel={texto}
+            accessibilityState={{ disabled: !!disabled }}
+            style={({ pressed }) => [
+                style.base,
+                formato === "quadrado" ? style.quadrado : style.arredondado,
+                { backgroundColor: pressed ? corFundoPressionado : corFundo },
+                disabled && style.desabilitado,
+                styleExterno,
+            ]}
+            {...rest}
+        >
+            {posicaoIcone === "esquerda" && iconeEl}
+
+            <Text style={[style.texto, { color: corConteudo }]}>{texto}</Text>
+
+            {posicaoIcone === "direita" && iconeEl}
+        </Pressable>
+    )
+}
