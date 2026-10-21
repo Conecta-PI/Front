@@ -7,6 +7,8 @@ import NavBar from "../components/NavBar/NavBar"
 import { themes } from "../global/themes"
 
 import Login from "../pages/Login/Login"
+import Abertura from "../pages/Abertura/Abertura"
+import Onboarding from "../pages/Onboarding/Onboarding"
 import Cadastro from "../pages/Cadastro/Cadastro"
 import Inicio from "../pages/Inicio/Inicio"
 import Produtos from "../pages/Produtos/Produtos"
@@ -23,6 +25,8 @@ import DetalheProduto from "../pages/DetalheProduto/DetalheProduto"
 import { NavBarProvider, useNavBar } from "../contexts/NavBarContext"
 
 export type RootStackParamList = {
+    Abertura: undefined
+    Onboarding: undefined
     Login: undefined
     Cadastro: undefined
     Main: undefined
@@ -80,9 +84,11 @@ export default function Routes() {
         <NavBarProvider>
             <NavigationContainer theme={tema}>
                 <Stack.Navigator
-                    initialRouteName="Login"
-                    screenOptions={{ headerShown: false }}
+                    initialRouteName="Abertura"
+                    screenOptions={{ headerShown: false, animation: "none" }}
                 >
+                    <Stack.Screen name="Abertura" component={Abertura} />
+                    <Stack.Screen name="Onboarding" component={Onboarding} />
                     <Stack.Screen name="Login" component={Login} />
                     <Stack.Screen name="Cadastro" component={Cadastro} />
                     <Stack.Screen name="Main" component={MainTabs} />
