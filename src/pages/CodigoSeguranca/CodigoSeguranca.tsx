@@ -10,6 +10,18 @@ import RecuperacaoHeader from "../../components/RecuperacaoHeader/RecuperacaoHea
 import type { RootStackParamList } from "../../routes"
 import { style } from "./style"
 
+function formatarContato(contato?: string) {
+    if (!contato) return "p***@docesnaturais.com"
+    if (!contato.includes("@")) {
+        const telefone = contato.replace(/\D/g, "")
+        if (telefone.length === 11) {
+            return `(${telefone.slice(0, 2)}) *****-${telefone.slice(7)}`
+        }
+    }
+
+    return contato
+}
+
 export default function CodigoSeguranca() {
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>()
     const { params } = useRoute<RouteProp<RootStackParamList, "CodigoSeguranca">>()
@@ -36,7 +48,7 @@ export default function CodigoSeguranca() {
                 <Text style={style.descricao}>
                     Digite o código de 4 dígitos enviado{"\n"}para:
                 </Text>
-                <Text style={style.contato}>{params?.contato ?? "p***@docesnaturais.com"}</Text>
+                <Text style={style.contato}>{formatarContato(params?.contato)}</Text>
 
                 <View style={style.codigo}>
                     {codigo.map((digito, indice) => (

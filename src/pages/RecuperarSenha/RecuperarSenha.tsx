@@ -12,8 +12,8 @@ import { style } from "./style"
 export default function RecuperarSenha() {
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>()
 
-    function escolherCanal() {
-        navigation.navigate("CodigoSeguranca", { contato: "p***@docesnaturais.com" })
+    function escolherCanal(contato: string) {
+        navigation.navigate("CodigoSeguranca", { contato })
     }
 
     return (
@@ -27,10 +27,13 @@ export default function RecuperarSenha() {
                     </Text>
                 </View>
 
-                <Button texto="E-mail" onPress={escolherCanal} />
+                <Button
+                    texto="E-mail"
+                    onPress={() => escolherCanal("p***@docesnaturais.com")}
+                />
                 <Text style={style.ajuda}>Enviaremos o código para o e-mail{"\n"}cadastrado na sua conta.</Text>
 
-                <Button texto="SMS" onPress={escolherCanal} />
+                <Button texto="SMS" onPress={() => escolherCanal("11900000000")} />
                 <Text style={style.ajuda}>Enviaremos o código por mensagem de texto{"\n"}para o celular cadastrado.</Text>
             </RecuperacaoCard>
         </View>
