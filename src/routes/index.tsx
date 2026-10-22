@@ -21,6 +21,10 @@ import Clientes from "../pages/Clientes/Clientes"
 import NovoProduto from "../pages/NovoProduto/NovoProduto"
 import DetalheEncomenda from "../pages/DetalheEncomenda/DetalheEncomenda"
 import DetalheProduto from "../pages/DetalheProduto/DetalheProduto"
+import RecuperarSenha from "../pages/RecuperarSenha/RecuperarSenha"
+import CodigoSeguranca from "../pages/CodigoSeguranca/CodigoSeguranca"
+import NovaSenha from "../pages/NovaSenha/NovaSenha"
+import RecuperacaoSucesso from "../pages/RecuperacaoSucesso/RecuperacaoSucesso"
 
 import { NavBarProvider, useNavBar } from "../contexts/NavBarContext"
 
@@ -29,6 +33,10 @@ export type RootStackParamList = {
     Onboarding: undefined
     Login: undefined
     Cadastro: undefined
+    RecuperarSenha: undefined
+    CodigoSeguranca: { contato?: string }
+    NovaSenha: undefined
+    RecuperacaoSucesso: undefined
     Main: undefined
     Estoque: undefined
     Encomendas: undefined
@@ -91,6 +99,10 @@ export default function Routes() {
                     <Stack.Screen name="Onboarding" component={Onboarding} />
                     <Stack.Screen name="Login" component={Login} />
                     <Stack.Screen name="Cadastro" component={Cadastro} />
+                    <Stack.Screen name="RecuperarSenha" component={RecuperarSenha} />
+                    <Stack.Screen name="CodigoSeguranca" component={CodigoSeguranca} />
+                    <Stack.Screen name="NovaSenha" component={NovaSenha} />
+                    <Stack.Screen name="RecuperacaoSucesso" component={RecuperacaoSucesso} />
                     <Stack.Screen name="Main" component={MainTabs} />
                     <Stack.Screen name="Estoque" component={Estoque} />
                     <Stack.Screen name="Encomendas" component={Encomendas} />

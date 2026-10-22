@@ -40,7 +40,7 @@ export default function Login() {
     }
 
     function esqueciSenha() {
-        
+        navigation.navigate("RecuperarSenha")
     }
 
     return (
