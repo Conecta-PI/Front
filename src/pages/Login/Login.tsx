@@ -6,6 +6,7 @@ import {
     Text,
     View,
 } from "react-native"
+import type { ScrollViewInstance } from "react-native"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { useNavigation } from "@react-navigation/native"
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
@@ -15,24 +16,36 @@ import Header from "../../components/Header/Header"
 import Input from "../../components/Input/Input"
 import Button from "../../components/Button/Button"
 import type { RootStackParamList } from "../../routes"
+import { autenticarResponsavel } from "../../services/auth"
 
 export default function Login() {
     const insets = useSafeAreaInsets()
     const navigation =
         useNavigation<NativeStackNavigationProp<RootStackParamList>>()
 
-    const scrollRef = useRef<ScrollView>(null)
+    const scrollRef = useRef<ScrollViewInstance>(null)
     const alturaHeader = useRef(0)
 
     const [email, setEmail] = useState("")
     const [senha, setSenha] = useState("")
+    const [erro, setErro] = useState<string | null>(null)
+    const [carregando, setCarregando] = useState(false)
 
     function rolarParaFormulario() {
         scrollRef.current?.scrollTo({ y: alturaHeader.current, animated: true })
     }
 
-    function entrar() {
-        navigation.replace("Main")
+    async function entrar() {
+        setErro(null)
+        setCarregando(true)
+        try {
+            await autenticarResponsavel(email.trim(), senha)
+            navigation.replace("Main")
+        } catch (error) {
+            setErro(error instanceof Error ? error.message : "Não foi possível entrar.")
+        } finally {
+            setCarregando(false)
+        }
     }
 
     function criarConta() {
@@ -99,7 +112,12 @@ export default function Login() {
                             </Pressable>
                         </View>
 
-                        <Button texto="Entrar" onPress={entrar} />
+                        {erro && <Text style={style.erroAutenticacao}>{erro}</Text>}
+                        <Button
+                            texto={carregando ? "Entrando..." : "Entrar"}
+                            onPress={entrar}
+                            disabled={carregando}
+                        />
 
                         <View style={style.divisor}>
                             <View style={style.linha} />

@@ -1,5 +1,6 @@
 import React, { useRef, useState } from "react"
 import { KeyboardAvoidingView, ScrollView, Text, View } from "react-native"
+import type { ScrollViewInstance, ViewInstance } from "react-native"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { useNavigation } from "@react-navigation/native"
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
@@ -10,12 +11,13 @@ import Input, { InputProps } from "../../components/Input/Input"
 import Button from "../../components/Button/Button"
 import Checkbox from "../../components/Checkbox/Checkbox"
 import type { RootStackParamList } from "../../routes"
+import { cadastrarResponsavel } from "../../services/auth"
 type CampoProps = InputProps & {
-    aoFocar: (view: View | null) => void
+    aoFocar: (view: ViewInstance | null) => void
 }
 
 function Campo({ aoFocar, onFocus, ...props }: CampoProps) {
-    const ref = useRef<View>(null)
+    const ref = useRef<ViewInstance>(null)
 
     return (
         <View ref={ref} collapsable={false}>
@@ -46,7 +48,7 @@ export default function Cadastro() {
     const navigation =
         useNavigation<NativeStackNavigationProp<RootStackParamList>>()
 
-    const scrollRef = useRef<ScrollView>(null)
+    const scrollRef = useRef<ScrollViewInstance>(null)
     const scrollY = useRef(0)
 
     const [form, setForm] = useState<Form>({
@@ -59,13 +61,15 @@ export default function Cadastro() {
     })
     const [aceito, setAceito] = useState(false)
     const [erros, setErros] = useState<Erros>({})
+    const [erroServidor, setErroServidor] = useState<string | null>(null)
+    const [carregando, setCarregando] = useState(false)
 
     function alterar(campo: keyof Form, valor: string) {
         setForm((f) => ({ ...f, [campo]: valor }))
         setErros((e) => ({ ...e, [campo]: undefined }))
     }
 
-    function rolarParaCampo(view: View | null) {
+    function rolarParaCampo(view: ViewInstance | null) {
         if (!view) return
 
         setTimeout(() => {
@@ -93,10 +97,25 @@ export default function Cadastro() {
         return Object.keys(novos).length === 0
     }
 
-    function criarConta() {
+    async function criarConta() {
         if (!validar()) return
 
-        navigation.replace("Main")
+        setErroServidor(null)
+        setCarregando(true)
+        try {
+            await cadastrarResponsavel({
+                nome: form.nome.trim(),
+                email: form.email.trim(),
+                telefone: form.telefone,
+                senha: form.senha,
+                negocio: form.negocio.trim(),
+            })
+            navigation.replace("Main")
+        } catch (error) {
+            setErroServidor(error instanceof Error ? error.message : "Não foi possível criar a conta.")
+        } finally {
+            setCarregando(false)
+        }
     }
 
     function abrirTermos() {
@@ -211,7 +230,14 @@ export default function Cadastro() {
                             )}
                         </View>
 
-                        <Button texto="Criar conta" onPress={criarConta} />
+                        {erroServidor && (
+                            <Text style={style.erroTermos}>{erroServidor}</Text>
+                        )}
+                        <Button
+                            texto={carregando ? "Criando conta..." : "Criar conta"}
+                            onPress={criarConta}
+                            disabled={carregando}
+                        />
 
                         <View style={style.divisor}>
                             <View style={style.linha} />

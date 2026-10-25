@@ -57,6 +57,12 @@ export const style = StyleSheet.create({
         alignSelf: "flex-end",
     },
 
+    erroAutenticacao: {
+        ...themes.typography.apoio,
+        color: themes.colors["erro"],
+        textAlign: "center",
+    },
+
     divisor: {
         flexDirection: "row",
         alignItems: "center",
