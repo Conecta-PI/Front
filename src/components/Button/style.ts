@@ -25,6 +25,10 @@ export const style = StyleSheet.create({
         ...themes.typography.botao,
     },
 
+    textoCentralizado: {
+        textAlign: "center",
+    },
+
     iconeEsquerda: {
         marginRight: 8,
     },

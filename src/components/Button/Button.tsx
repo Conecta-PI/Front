@@ -17,6 +17,7 @@ type ButtonProps = Omit<PressableProps, "style" | "children"> & {
     icone?: IconName
     posicaoIcone?: "esquerda" | "direita"
     corTexto?: CorTema
+    textoEmUmaLinha?: boolean
     style?: StyleProp<ViewStyle>
 }
 
@@ -40,6 +41,7 @@ export default function Button({
     icone,
     posicaoIcone = "esquerda",
     corTexto,
+    textoEmUmaLinha = false,
     disabled,
     style: styleExterno,
     ...rest
@@ -75,7 +77,13 @@ export default function Button({
         >
             {posicaoIcone === "esquerda" && iconeEl}
 
-            <Text style={[style.texto, { color: corConteudo }]}>{texto}</Text>
+            <Text
+                numberOfLines={textoEmUmaLinha ? 1 : undefined}
+                adjustsFontSizeToFit={textoEmUmaLinha}
+                style={[style.texto, textoEmUmaLinha && style.textoCentralizado, { color: corConteudo }]}
+            >
+                {texto}
+            </Text>
 
             {posicaoIcone === "direita" && iconeEl}
         </Pressable>
