@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { ActivityIndicator, ScrollView, View } from "react-native"
+import { ActivityIndicator, ScrollView, Text, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { NavigationProp, useNavigation } from "@react-navigation/native"
 
@@ -39,7 +39,7 @@ export default function Inicio() {
 
     const [periodo, setPeriodo] = useState<Periodo>("hoje")
     const [busca, setBusca] = useState("")
-    const { dados } = useDashboard(periodo)
+    const { dados, erro } = useDashboard(periodo)
 
     const alertas = dados?.alertas.filter((a) => a.quantidade > 0) ?? []
 
@@ -55,7 +55,11 @@ export default function Inicio() {
         >
             {!dados ? (
                 <View style={style.carregando}>
-                    <ActivityIndicator color={themes.colors["dourado"]} size="large" />
+                    {erro ? (
+                        <Text style={style.erro}>{erro}</Text>
+                    ) : (
+                        <ActivityIndicator color={themes.colors["dourado"]} size="large" />
+                    )}
                 </View>
             ) : (
                 <ScrollView

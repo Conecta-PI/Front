@@ -56,6 +56,11 @@ export const style = StyleSheet.create({
         ...themes.typography.titulo1,
         color: themes.colors["branco"],
     },
+    nomeInicio: {
+        ...themes.typography.titulo2,
+        color: themes.colors["branco"],
+        flexShrink: 1,
+    },
     avatar: {
         width: 48,
         height: 48,

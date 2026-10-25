@@ -29,8 +29,20 @@ export default function CardRecebido({
             <Text style={style.valor}>{formatarMoeda(valor)}</Text>
 
             <View style={style.botoes}>
-                <Button texto="Cobrar agora" cor="dourado" onPress={onCobrar} style={style.botao} />
-                <Button texto="A receber" cor="branco" onPress={onReceber} style={style.botao} />
+                <Button
+                    texto="Cobrar agora"
+                    cor="dourado"
+                    onPress={onCobrar}
+                    textoEmUmaLinha
+                    style={style.botao}
+                />
+                <Button
+                    texto="A receber"
+                    cor="branco"
+                    onPress={onReceber}
+                    textoEmUmaLinha
+                    style={style.botao}
+                />
             </View>
 
             <View style={style.rodape}>

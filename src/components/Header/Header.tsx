@@ -131,6 +131,8 @@ function HeaderInicio({
     negocio,
     ...busca
 }: Extract<HeaderProps, { tipo: "inicio" }>) {
+    const primeiroNome = nome?.trim().split(/\s+/)[0]
+
     return (
         <View style={style.containerInicio}>
             <View style={style.topoInicio}>
@@ -138,8 +140,9 @@ function HeaderInicio({
                     {!!negocio && <Text style={style.negocio}>{negocio}</Text>}
 
                     <Text style={style.saudacao} numberOfLines={1}>
-                        {nome ? `${saudacao()}, ${nome}` : saudacao()}
+                        {saudacao()}
                     </Text>
+                    {!!primeiroNome && <Text style={style.nomeInicio}>{primeiroNome}</Text>}
                 </View>
 
                 <View style={style.avatar}>

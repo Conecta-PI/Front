@@ -2,7 +2,7 @@
 import React from "react"
 import { Pressable, Text, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
-import { NavigationProp, useNavigation } from "@react-navigation/native"
+import { CommonActions, NavigationProp, useNavigation } from "@react-navigation/native"
 
 import { style } from "./style"
 import { themes } from "../../global/themes"
@@ -61,7 +61,7 @@ export default function AlertaAtencao({ tipo, quantidade }: AlertaAtencaoProps) 
 
     return (
         <Pressable
-            onPress={() => navigation.navigate(config.destino)}
+            onPress={() => navigation.dispatch(CommonActions.navigate(config.destino))}
             accessibilityRole="button"
             style={({ pressed }) => [style.container, pressed && style.pressionado]}
         >

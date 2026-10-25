@@ -2,7 +2,7 @@
 import React from "react"
 import { Pressable, Text, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
-import { NavigationProp, useNavigation } from "@react-navigation/native"
+import { CommonActions, NavigationProp, useNavigation } from "@react-navigation/native"
 
 import { style } from "./style"
 import { themes } from "../../global/themes"
@@ -21,7 +21,7 @@ export default function AtalhoRapido({ icone, texto, destino }: AtalhoRapidoProp
 
     return (
         <Pressable
-            onPress={() => navigation.navigate(destino)}
+            onPress={() => navigation.dispatch(CommonActions.navigate(destino))}
             accessibilityRole="button"
             accessibilityLabel={texto}
             style={({ pressed }) => [style.card, pressed && style.cardPressionado]}

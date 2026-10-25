@@ -1,10 +1,17 @@
 import { StyleSheet } from "react-native"
+import { themes } from "../../global/themes"
 
 export const style = StyleSheet.create({
     carregando: {
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
+    },
+    erro: {
+        ...themes.typography.corpo,
+        color: themes.colors["erro"],
+        textAlign: "center",
+        paddingHorizontal: 24,
     },
     conteudo: {
         paddingHorizontal: 16,
