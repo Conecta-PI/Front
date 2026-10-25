@@ -144,4 +144,57 @@ export const style = StyleSheet.create({
     chipTextoAtivo: {
         color: themes.colors["branco"],
     },
+        // ---------- tipo perfil ----------
+    containerPerfil: {
+        backgroundColor: themes.colors["azul-escuro"],
+        alignItems: "center",
+        paddingTop: 16,
+        paddingBottom: 28,
+        paddingHorizontal: 16,
+        gap: 6,
+        borderBottomLeftRadius: 32,
+        borderBottomRightRadius: 32,
+    },
+    avatarGrande: {
+        width: 84,
+        height: 84,
+        borderRadius: 42,
+        marginBottom: 6,
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: themes.colors["branco"],
+        borderWidth: 3,
+        borderColor: themes.colors["dourado"],
+    },
+    inicialGrande: {
+        ...themes.typography.valorGrande,
+        color: themes.colors["azul-escuro"],
+    },
+    editarPerfil: {
+        position: "absolute",
+        right: -4,
+        bottom: -4,
+        width: 28,
+        height: 28,
+        borderRadius: 14,
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: themes.colors["dourado"],
+        borderWidth: 2,
+        borderColor: themes.colors["azul-escuro"],
+    },
+    nomeLinha: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
+    },
+    nomePerfil: {
+        ...themes.typography.titulo2,
+        color: themes.colors["branco"],
+        flexShrink: 1,
+    },
+    negocioPerfil: {
+        ...themes.typography.apoio,
+        color: themes.colors["borda"],
+    },
 })

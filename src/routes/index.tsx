@@ -25,6 +25,12 @@ import RecuperarSenha from "../pages/RecuperarSenha/RecuperarSenha"
 import CodigoSeguranca from "../pages/CodigoSeguranca/CodigoSeguranca"
 import NovaSenha from "../pages/NovaSenha/NovaSenha"
 import RecuperacaoSucesso from "../pages/RecuperacaoSucesso/RecuperacaoSucesso"
+import Financeiro from "../pages/Financeiro/Financeiro"
+import ListaCompras from "../pages/ListaCompras/ListaCompras"
+import Fornecedores from "../pages/Fornecedores/Fornecedores"
+import FichaTecnica from "../pages/FichaTecnica/FichaTecnica"
+import Relatorios from "../pages/Relatorios/Relatorios"
+import Configuracoes from "../pages/Configuracoes/Configuracoes"
 
 import { NavBarProvider, useNavBar } from "../contexts/NavBarContext"
 
@@ -43,7 +49,13 @@ export type RootStackParamList = {
     Clientes: undefined
     NovoProduto: undefined
     DetalheEncomenda: { id: string }
-    DetalheProduto: { id: string }  
+    DetalheProduto: { id: string }
+    Financeiro: undefined
+    ListaCompras: undefined
+    Fornecedores: undefined
+    FichaTecnica: undefined
+    Relatorios: undefined
+    Configuracoes: undefined
 }
 
 export type RootTabParamList = {
@@ -110,6 +122,12 @@ export default function Routes() {
                     <Stack.Screen name="NovoProduto" component={NovoProduto} />
                     <Stack.Screen name="DetalheEncomenda" component={DetalheEncomenda} />
                     <Stack.Screen name="DetalheProduto" component={DetalheProduto} />
+                    <Stack.Screen name="Financeiro" component={Financeiro} />
+                    <Stack.Screen name="ListaCompras" component={ListaCompras} />
+                    <Stack.Screen name="Fornecedores" component={Fornecedores} />
+                    <Stack.Screen name="FichaTecnica" component={FichaTecnica} />
+                    <Stack.Screen name="Relatorios" component={Relatorios} />
+                    <Stack.Screen name="Configuracoes" component={Configuracoes} />
                 </Stack.Navigator>
             </NavigationContainer>
         </NavBarProvider>

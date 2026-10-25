@@ -1,3 +1,4 @@
+// src/components/Header/Header.tsx
 import React from "react"
 import { Image, Pressable, ScrollView, Text, TextInput, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
@@ -10,6 +11,10 @@ import Logo from "../../assets/images/logo.png"
 
 import Filtro from "../../components/Filtro"
 
+/* =====================================================================
+   1. TIPOS
+   ===================================================================== */
+
 type BuscaProps = {
     busca: string
     onChangeBusca: (texto: string) => void
@@ -17,31 +22,46 @@ type BuscaProps = {
 }
 
 export type HeaderProps =
-
+    // login
     | { tipo: "boasVindas" }
 
+    // cadastro: logo + título + descrição
     | { tipo: "titulo"; titulo: string; descricao?: string }
 
+    // página inicial: saudação, avatar e busca
     | ({
-        tipo: "inicio"
-        nome?: string
-        negocio?: string
-    } & BuscaProps)
-    | ({
-        tipo: "buscaVoltar"
-        titulo: string
-        onVoltar?: () => void
-    } & BuscaProps)
+          tipo: "inicio"
+          nome?: string
+          negocio?: string
+      } & BuscaProps)
 
+    // cobrar: voltar + título + busca
     | ({
-        tipo: "catalogo"
-        titulo: string
-        categorias: string[]
-        categoriaAtiva: string
-        onChangeCategoria: (categoria: string) => void
-    } & BuscaProps)
+          tipo: "buscaVoltar"
+          titulo: string
+          onVoltar?: () => void
+      } & BuscaProps)
 
+    // produtos: título + busca + filtros de categoria
+    | ({
+          tipo: "catalogo"
+          titulo: string
+          categorias: string[]
+          categoriaAtiva: string
+          onChangeCategoria: (categoria: string) => void
+      } & BuscaProps)
+
+    // detalhes e telas simples: voltar + título
     | { tipo: "detalhe"; titulo: string; onVoltar?: () => void; semVoltar?: boolean }
+
+    // perfil: avatar, nome (com estrela opcional) e negócio
+    | {
+          tipo: "perfil"
+          nome?: string
+          negocio?: string
+          premium?: boolean
+          onEditar?: () => void
+      }
 
 function saudacao() {
     const hora = new Date().getHours()
@@ -49,6 +69,10 @@ function saudacao() {
     if (hora < 18) return "Boa tarde"
     return "Boa noite"
 }
+
+/* =====================================================================
+   2. PEDAÇOS REUTILIZADOS PELOS TIPOS
+   ===================================================================== */
 
 function Busca({ busca, onChangeBusca, placeholder = "Buscar produto..." }: BuscaProps) {
     return (
@@ -66,6 +90,7 @@ function Busca({ busca, onChangeBusca, placeholder = "Buscar produto..." }: Busc
     )
 }
 
+// se não passar onVoltar, volta para a tela anterior sozinho
 function BotaoVoltar({ onVoltar }: { onVoltar?: () => void }) {
     const navigation = useNavigation()
 
@@ -81,7 +106,16 @@ function BotaoVoltar({ onVoltar }: { onVoltar?: () => void }) {
     )
 }
 
-function Topo({ titulo, voltar, onVoltar }: { titulo: string; voltar?: boolean; onVoltar?: () => void }) {
+// linha do topo: [voltar opcional] + título
+function Topo({
+    titulo,
+    voltar,
+    onVoltar,
+}: {
+    titulo: string
+    voltar?: boolean
+    onVoltar?: () => void
+}) {
     return (
         <View style={style.topoBarra}>
             {voltar && <BotaoVoltar onVoltar={onVoltar} />}
@@ -93,6 +127,11 @@ function Topo({ titulo, voltar, onVoltar }: { titulo: string; voltar?: boolean; 
     )
 }
 
+/* =====================================================================
+   3. UM COMPONENTE PARA CADA TIPO
+   ===================================================================== */
+
+// boasVindas e titulo
 function HeaderLogo({
     rotulo,
     titulo,
@@ -159,7 +198,11 @@ function HeaderInicio({
     )
 }
 
-function HeaderBuscaVoltar({ titulo, onVoltar, ...busca }: Extract<HeaderProps, { tipo: "buscaVoltar" }>) {
+function HeaderBuscaVoltar({
+    titulo,
+    onVoltar,
+    ...busca
+}: Extract<HeaderProps, { tipo: "buscaVoltar" }>) {
     return (
         <View style={style.containerBarra}>
             <Topo titulo={titulo} voltar onVoltar={onVoltar} />
@@ -182,6 +225,7 @@ function HeaderCatalogo({
                 <Busca {...busca} />
             </View>
 
+            {/* os filtros ficam fora do bloco azul, sobre o fundo bege */}
             <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
@@ -202,13 +246,62 @@ function HeaderCatalogo({
     )
 }
 
-function HeaderDetalhe({ titulo, onVoltar, semVoltar }: Extract<HeaderProps, { tipo: "detalhe" }>) {
+function HeaderDetalhe({
+    titulo,
+    onVoltar,
+    semVoltar,
+}: Extract<HeaderProps, { tipo: "detalhe" }>) {
     return (
         <View style={style.containerBarra}>
             <Topo titulo={titulo} voltar={!semVoltar} onVoltar={onVoltar} />
         </View>
     )
 }
+
+function HeaderPerfil({
+    nome,
+    negocio,
+    premium,
+    onEditar,
+}: Extract<HeaderProps, { tipo: "perfil" }>) {
+    return (
+        <View style={style.containerPerfil}>
+            <View style={style.avatarGrande}>
+                <Text style={style.inicialGrande}>
+                    {nome ? nome.charAt(0).toUpperCase() : ""}
+                </Text>
+
+                {!!onEditar && (
+                    <Pressable
+                        onPress={onEditar}
+                        accessibilityRole="button"
+                        accessibilityLabel="Editar perfil"
+                        style={({ pressed }) => [
+                            style.editarPerfil,
+                            pressed && style.voltarPressionado,
+                        ]}
+                    >
+                        <Ionicons name="pencil" size={12} color={themes.colors["azul-escuro"]} />
+                    </Pressable>
+                )}
+            </View>
+
+            <View style={style.nomeLinha}>
+                <Text style={style.nomePerfil} numberOfLines={1}>
+                    {nome}
+                </Text>
+
+                {premium && <Ionicons name="star" size={16} color={themes.colors["dourado"]} />}
+            </View>
+
+            {!!negocio && <Text style={style.negocioPerfil}>{negocio}</Text>}
+        </View>
+    )
+}
+
+/* =====================================================================
+   4. ESCOLHE O COMPONENTE PELO TIPO
+   ===================================================================== */
 
 export default function Header(props: HeaderProps) {
     switch (props.tipo) {
@@ -229,5 +322,8 @@ export default function Header(props: HeaderProps) {
 
         case "detalhe":
             return <HeaderDetalhe {...props} />
+
+        case "perfil":
+            return <HeaderPerfil {...props} />
     }
 }
