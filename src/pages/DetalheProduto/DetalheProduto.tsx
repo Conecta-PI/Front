@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useEffect, useState } from "react"
 import { Image, ScrollView, Text, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { RouteProp, useRoute } from "@react-navigation/native"
@@ -16,13 +16,40 @@ export default function DetalheProduto() {
     const { params } = useRoute<RouteProp<RootStackParamList, "DetalheProduto">>()
     const insets = useSafeAreaInsets()
 
-    const produto = buscarProduto(params.id)
+    const [produto, setProduto] = useState<Awaited<ReturnType<typeof buscarProduto>>>(null)
+    const [carregando, setCarregando] = useState(true)
+    const [erro, setErro] = useState<string | null>(null)
+
+    useEffect(() => {
+        let ativo = true
+
+        buscarProduto(params.id)
+            .then((dados) => {
+                if (ativo) {
+                    setProduto(dados)
+                    setErro(null)
+                    setCarregando(false)
+                }
+            })
+            .catch((error: unknown) => {
+                if (ativo) {
+                    setErro(error instanceof Error ? error.message : "Erro ao carregar produto.")
+                    setCarregando(false)
+                }
+            })
+
+        return () => {
+            ativo = false
+        }
+    }, [params.id])
 
     return (
         <AppLayout header={{ tipo: "detalhe", titulo: produto?.nome ?? "Produto" }}>
             {!produto ? (
                 <View style={style.centro}>
-                    <Text style={style.vazio}>Produto não encontrado.</Text>
+                    <Text style={style.vazio}>
+                        {erro ?? (carregando ? "Carregando produto..." : "Produto não encontrado.")}
+                    </Text>
                 </View>
             ) : (
                 <ScrollView

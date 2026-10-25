@@ -11,7 +11,9 @@ import FormaPagamento, {
     TipoPagamento,
 } from "../../components/FormaPagamento/"
 import { useNavBar } from "../../contexts/NavBarContext"
-import { CLIENTES, filtrarProdutos, listarProdutos } from "../../services/produtos"
+import { filtrarProdutos, listarClientes, listarProdutos } from "../../services/produtos"
+import type { DropdownOpcao } from "../../components/Dropdown/"
+import type { Produto } from "../../types/produto"
 
 export default function Cobrar() {
     const { setCobranca } = useNavBar()
@@ -20,21 +22,54 @@ export default function Cobrar() {
     const [quantidades, setQuantidades] = useState<Record<string, number>>({})
     const [cliente, setCliente] = useState<string | null>(null)
     const [pagamento, setPagamento] = useState<TipoPagamento | null>(null)
+    const [todosProdutos, setTodosProdutos] = useState<Produto[]>([])
+    const [clientes, setClientes] = useState<DropdownOpcao[]>([])
+    const [carregando, setCarregando] = useState(true)
+    const [erro, setErro] = useState<string | null>(null)
 
-    const produtos = useMemo(() => filtrarProdutos(busca, "Todos"), [busca])
+    const produtos = useMemo(
+        () => filtrarProdutos(todosProdutos, busca, "Todos"),
+        [todosProdutos, busca]
+    )
 
     const { itens, total } = useMemo(() => {
         let itens = 0
         let total = 0
 
-        for (const p of listarProdutos()) {
+        for (const p of todosProdutos) {
             const q = quantidades[p.id] ?? 0
             itens += q
             total += q * p.preco
         }
 
         return { itens, total }
-    }, [quantidades])
+    }, [todosProdutos, quantidades])
+
+    useFocusEffect(
+        useCallback(() => {
+            let ativo = true
+
+            Promise.all([listarProdutos(), listarClientes()])
+                .then(([produtosCarregados, clientesCarregados]) => {
+                    if (ativo) {
+                        setTodosProdutos(produtosCarregados)
+                        setClientes(clientesCarregados)
+                        setErro(null)
+                        setCarregando(false)
+                    }
+                })
+                .catch((error: unknown) => {
+                    if (ativo) {
+                        setErro(error instanceof Error ? error.message : "Erro ao carregar dados.")
+                        setCarregando(false)
+                    }
+                })
+
+            return () => {
+                ativo = false
+            }
+        }, [])
+    )
 
     function alterarQuantidade(id: string, quantidade: number) {
         setQuantidades((atual) => ({ ...atual, [id]: quantidade }))
@@ -86,14 +121,17 @@ export default function Cobrar() {
                     />
                 )}
                 ListEmptyComponent={
-                    <Text style={style.vazio}>Nenhum produto encontrado.</Text>
+                    <Text style={style.vazio}>
+                        {erro ?? (carregando ? "Carregando produtos..." : "Nenhum produto encontrado.")}
+                    </Text>
                 }
                 ListFooterComponent={
                     <View style={style.formulario}>
+                        {erro && <Text style={style.vazio}>{erro}</Text>}
                         <Dropdown
                             label="Cliente"
                             placeholder="Selecione o cliente"
-                            opcoes={CLIENTES}
+                            opcoes={clientes}
                             valor={cliente}
                             onChange={setCliente}
                         />
