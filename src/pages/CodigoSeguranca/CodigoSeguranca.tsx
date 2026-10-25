@@ -1,5 +1,6 @@
 import React, { useRef, useState } from "react"
 import { Pressable, Text, TextInput, View } from "react-native"
+import type { TextInputInstance } from "react-native"
 import { useNavigation, useRoute } from "@react-navigation/native"
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import type { RouteProp } from "@react-navigation/native"
@@ -26,7 +27,7 @@ export default function CodigoSeguranca() {
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>()
     const { params } = useRoute<RouteProp<RootStackParamList, "CodigoSeguranca">>()
     const [codigo, setCodigo] = useState(["", "", "", ""])
-    const refs = useRef<Array<TextInput | null>>([])
+    const refs = useRef<Array<TextInputInstance | null>>([])
 
     function alterarCodigo(valor: string, indice: number) {
         const digito = valor.replace(/\D/g, "").slice(-1)
