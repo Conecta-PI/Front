@@ -143,8 +143,9 @@ src/
 │   └── index.tsx              ← Stack + Tabs
 │
 ├── services/
-│   ├── dashboard.ts           ← simulação do backend (home)
-│   └── produtos.ts            ← simulação do backend (produtos e clientes)
+│   ├── api.ts                 ← cliente HTTP da API local
+│   ├── dashboard.ts           ← dados simulados do dashboard
+│   └── produtos.ts            ← produtos e clientes via API
 │
 ├── types/
 │   ├── dashboard.ts
@@ -292,8 +293,8 @@ params.id // "3"
 - Card branco que ocupa todo o espaço restante da tela, com o conteúdo centralizado na vertical.
 - `KeyboardAvoidingView` + `ScrollView`: ao focar em um input, a tela rola até o formulário (o header sobe).
 - Campos: `Input tipo="email"` e `Input tipo="senha"` (com olho para mostrar/ocultar).
-- Botões: **Entrar** (`navigation.replace("Main")`) e **Criar conta** (`navigate("Cadastro")`).
-- Pendências marcadas com `TODO`: autenticar na API e a tela de recuperação de senha.
+- Botões: **Entrar** autentica na API antes de abrir a tela principal; **Criar conta** abre o cadastro da única conta do responsável.
+- A recuperação de senha ainda não está integrada ao back-end.
 
 ### Cadastro
 
@@ -703,7 +704,7 @@ Campo que abre uma lista logo abaixo, **empurrando o conteúdo** (não flutua po
 <Dropdown
     label="Cliente"
     placeholder="Selecione o cliente"
-    opcoes={CLIENTES}
+    opcoes={clientes}
     valor={cliente}
     onChange={setCliente}
 />
@@ -992,7 +993,29 @@ O componente mede a largura do card (`onLayout`) e distribui as barras igualment
 
 ## 10. Camada de dados
 
-Todos os dados são **simulados** nos arquivos de `services/`. Para integrar o backend, troque apenas o corpo das funções; **os componentes e as páginas não mudam**.
+Produtos, clientes e os dados de demonstração do dashboard são carregados pela API do back-end. Os dados do dashboard são persistidos em tabelas próprias, separadas das vendas e movimentações financeiras; não representam transações reais. A integração preserva os componentes e o layout das telas.
+
+Para iniciar o **back e o front juntos** no Windows/PowerShell, use o mesmo comando documentado no README do Backend:
+
+```powershell
+Set-Location C:\projetos\conecta\Backend
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\scripts\iniciar-conecta.ps1
+```
+
+Escolha **1 - Primeira vez no projeto?** para verificar e preparar as ferramentas, dependências e extensões. Se for instalar programas, feche e reabra o terminal e o VS Code e execute o comando novamente para concluir a configuração. Nas sessões seguintes, escolha **2 - Ja configurei** e depois o banco desejado. H2 não precisa ser instalado separadamente. Se escolher MySQL, o assistente avisa antes de pedir os dados. Depois, exibe o servidor, porta, banco e usuário informados (a senha fica oculta) e pede somente confirmação: digite `S` para prosseguir ou `Q` para cancelar. Essa etapa não permite editar os dados; para corrigi-los, cancele e execute novamente. Antes de iniciar o back, o assistente verifica se a porta `8080` está livre. Se já houver outro back em execução, pressione `Ctrl+C` na janela dele e execute o iniciador novamente; nenhum processo é encerrado automaticamente. O back inicia primeiro; quando a API estiver pronta, o front abre em outra janela. Mantenha as duas janelas abertas.
+
+Para iniciar **somente o front**, entre na pasta `Front` e execute `.\scripts\iniciar-front.ps1`. Na primeira vez, o assistente verifica o Node.js e instala as dependências com `npm ci`; depois, escolha **Ja configurei** para iniciar o Expo. Instale o Expo Go no celular pela loja de aplicativos. O celular e o computador devem estar na mesma rede Wi-Fi.
+
+O endereço do back-end é montado usando o host local do Expo e a porta `8080`. O celular e o computador precisam estar na mesma rede Wi-Fi, e a API deve estar ativa.
+
+O primeiro responsável pelo negócio cria uma única conta pela tela **Criar conta**. Depois, o login usa o e-mail e a senha escolhidos no cadastro; clientes da lista são contatos e não podem autenticar. O front envia o token Bearer automaticamente e o guarda com `expo-secure-store`.
+
+### Acesso dos integrantes para teste
+
+Para testar em celulares na mesma rede local, o computador que executa o back-end deve manter a API ativa na porta `8080`; compartilhe com os integrantes o IPv4 desse computador e as instruções de acesso ao app separadamente pelo grupo de WhatsApp. Cada integrante usa o mesmo e-mail e a mesma senha da única conta do responsável. Não inclua credenciais neste README, no Git ou em arquivos `.env`; nunca compartilhe a senha do MySQL nem o segredo JWT. A conta é compartilhada e concede o mesmo nível de acesso a todos que a utilizarem.
+
+O front detecta o endereço do computador que executa o Expo e monta a URL da API; não é necessário criar um `.env` com credenciais. Se o front e o back estiverem em computadores diferentes, ou os celulares estiverem em outra rede, o endereço local pode não ser acessível: alinhe a configuração de rede antes do teste. Não exponha as portas do banco ou da API diretamente à internet.
 
 ### Tipos
 
@@ -1027,11 +1050,12 @@ type Produto = {
 
 | Função | Arquivo | O que faz hoje | Substitua por |
 |---|---|---|---|
-| `buscarDashboard(periodo)` | `services/dashboard.ts` | Retorna dados fixos após 600 ms | `fetch(`${API_URL}/dashboard?periodo=${periodo}`)` |
-| `listarProdutos()` | `services/produtos.ts` | Lista fixa | `GET /produtos` |
-| `filtrarProdutos(busca, categoria)` | `services/produtos.ts` | Filtra a lista fixa (ignora acentos e maiúsculas) | `GET /produtos?busca=&categoria=` |
-| `buscarProduto(id)` | `services/produtos.ts` | Procura na lista fixa | `GET /produtos/:id` |
-| `CATEGORIAS`, `CLIENTES` | `services/produtos.ts` | Constantes | `GET /categorias`, `GET /clientes` |
+| `buscarDashboard(periodo)` | `services/dashboard.ts` | Busca o período selecionado no back-end | `GET /api/dashboard?periodo=hoje\|semana\|mes` |
+| `listarProdutos()` | `services/produtos.ts` | Busca produtos no back-end | `GET /api/produtos` |
+| `filtrarProdutos(produtos, busca, categoria)` | `services/produtos.ts` | Filtra dados carregados (ignora acentos e maiúsculas) | Filtro local |
+| `buscarProduto(id)` | `services/produtos.ts` | Busca um produto no back-end | `GET /api/produtos/:id` |
+| `listarClientes()` | `services/produtos.ts` | Busca clientes para o seletor de cobrança | `GET /api/clientes` |
+| `CATEGORIAS` | `services/produtos.ts` | Categorias disponíveis no filtro da interface | Constante de interface |
 
 ### Hook
 
@@ -1107,5 +1131,5 @@ Siga a convenção: pasta com `NomeDoComponente.tsx` + `style.ts`, estilos pelo 
 - **KeyboardAvoidingView no Android:** o Login e o Cadastro usam `behavior="padding"`. Se aparecer um espaço duplicado acima do teclado, use `behavior={Platform.OS === "ios" ? "padding" : undefined}`.
 - **Imports de pasta:** algumas páginas importam componentes pela pasta (`../../components/ProdutoCard/`), o que exige um `index.tsx` na pasta que reexporte o componente. Outras importam direto o arquivo (`.../ProdutoCard/ProdutoCard`). Escolha um padrão e mantenha em todo o projeto.
 - **Pastas que podem ser apagadas:** `components/HeaderInicio`, substituída pelo tipo `inicio` do `Header`.
-- **Pendências marcadas com `TODO` no código:** autenticação (Login), envio do cadastro (Cadastro), recuperação de senha, termos de uso, geração da cobrança (Cobrar) e "Adicionar ao pedido" (DetalheProduto).
+- **Pendências funcionais restantes:** recuperação de senha, termos de uso, geração da cobrança (Cobrar) e "Adicionar ao pedido" (DetalheProduto). Login e cadastro do responsável já estão conectados à API.
 - **Datas das entregas:** o backend deve enviar `dia` já formatado ("Hoje", "Amanhã", "22/10").
