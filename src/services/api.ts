@@ -87,3 +87,11 @@ export function apiPost<T>(path: string, body: unknown): Promise<T> {
         !path.startsWith("/auth/")
     )
 }
+
+export function apiPatch<T>(path: string, body: unknown): Promise<T> {
+    return requisitar<T>(path, { method: "PATCH", body: JSON.stringify(body) }, true)
+}
+
+export function apiDelete<T = void>(path: string): Promise<T> {
+    return requisitar<T>(path, { method: "DELETE" }, true)
+}

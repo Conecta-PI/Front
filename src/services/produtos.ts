@@ -20,11 +20,6 @@ type ProdutoApi = {
     estoque: number
 }
 
-type ClienteApi = {
-    id: number
-    nome: string
-}
-
 function mapearProduto(produto: ProdutoApi): Produto {
     return { ...produto, id: String(produto.id) }
 }
@@ -47,7 +42,7 @@ export async function buscarProduto(id: string): Promise<Produto | null> {
 }
 
 export async function listarClientes() {
-    const clientes = await apiGet<ClienteApi[]>("/clientes")
+    const clientes = await apiGet<{ id: number; nome: string }[]>("/clientes")
     return clientes.map((cliente) => ({
         valor: String(cliente.id),
         label: cliente.nome,

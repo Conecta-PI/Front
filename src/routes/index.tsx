@@ -18,6 +18,7 @@ import Mais from "../pages/Mais/Mais"
 import Estoque from "../pages/Estoque/Estoque"
 import Encomendas from "../pages/Encomendas/Encomendas"
 import Clientes from "../pages/Clientes/Clientes"
+import DetalheCliente from "../pages/Clientes/DetalheCliente"
 import NovoProduto from "../pages/NovoProduto/NovoProduto"
 import DetalheEncomenda from "../pages/DetalheEncomenda/DetalheEncomenda"
 import DetalheProduto from "../pages/DetalheProduto/DetalheProduto"
@@ -47,6 +48,7 @@ export type RootStackParamList = {
     Estoque: undefined
     Encomendas: undefined
     Clientes: undefined
+    DetalheCliente: { id: string }
     NovoProduto: undefined
     DetalheEncomenda: { id: string }
     DetalheProduto: { id: string }
@@ -119,6 +121,7 @@ export default function Routes() {
                     <Stack.Screen name="Estoque" component={Estoque} />
                     <Stack.Screen name="Encomendas" component={Encomendas} />
                     <Stack.Screen name="Clientes" component={Clientes} />
+                    <Stack.Screen name="DetalheCliente" component={DetalheCliente} />
                     <Stack.Screen name="NovoProduto" component={NovoProduto} />
                     <Stack.Screen name="DetalheEncomenda" component={DetalheEncomenda} />
                     <Stack.Screen name="DetalheProduto" component={DetalheProduto} />
