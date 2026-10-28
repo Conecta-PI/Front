@@ -1,4 +1,4 @@
-// src/components/Dropdown/Dropdown.tsx
+
 import React, { useState } from "react"
 import { Pressable, ScrollView, Text, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
@@ -35,7 +35,7 @@ export default function Dropdown({
                 onPress={() => setAberto((a) => !a)}
                 accessibilityRole="button"
                 accessibilityState={{ expanded: aberto }}
-                style={style.campo}
+                style={[style.campo, aberto && style.campoAberto]}
             >
                 <Text
                     style={[style.textoCampo, !selecionada && style.placeholder]}

@@ -24,7 +24,14 @@
     "plugins": [
       "expo-font",
       "expo-status-bar",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "O Conecta precisa acessar suas fotos para escolher a imagem do produto.",
+          "cameraPermission": "O Conecta precisa da câmera para fotografar o produto."
+        }
+      ]
     ]
   }
 }

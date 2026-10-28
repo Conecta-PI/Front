@@ -40,4 +40,8 @@ export const style = StyleSheet.create({
     desabilitado: {
         opacity: 0.5,
     },
+
+    contorno: {
+        borderWidth: 1.5,
+    },
 })

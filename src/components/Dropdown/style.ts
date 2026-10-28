@@ -54,4 +54,8 @@ export const style = StyleSheet.create({
     textoOpcaoAtiva: {
         fontFamily: "Poppins_600SemiBold",
     },
+
+    campoAberto: {
+        borderColor: themes.colors["dourado"],
+    },
 })

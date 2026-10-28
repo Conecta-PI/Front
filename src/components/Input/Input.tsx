@@ -5,7 +5,7 @@ import { Ionicons } from "@expo/vector-icons"
 import { style } from "./style"
 import { themes } from "../../global/themes"
 
-export type InputTipo = "email" | "senha" | "texto" | "telefone"
+export type InputTipo = "email" | "senha" | "texto" | "telefone" | "moeda" | "decimal"
 
 export type InputProps = Omit<TextInputProps, "secureTextEntry" | "keyboardType"> & {
     tipo: InputTipo
@@ -21,6 +21,27 @@ function mascaraTelefone(valor: string) {
     if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`
     if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`
     return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`
+}
+
+function mascaraMoeda(valor: string) {
+    const d = valor.replace(/\D/g, "").slice(0, 9)
+    if (!d) return ""
+
+    const [inteiro, decimal] = (parseInt(d, 10) / 100).toFixed(2).split(".")
+    return `${inteiro.replace(/\B(?=(\d{3})+(?!\d))/g, ".")},${decimal}`
+}
+
+function mascaraDecimal(valor: string) {
+    const limpo = valor.replace(/[^\d,.]/g, "").replace(/\./g, ",")
+    const [inteiro, ...resto] = limpo.split(",")
+
+    return resto.length > 0 ? `${inteiro},${resto.join("").slice(0, 3)}` : inteiro
+}
+
+const MASCARAS: Partial<Record<InputTipo, (valor: string) => string>> = {
+    telefone: mascaraTelefone,
+    moeda: mascaraMoeda,
+    decimal: mascaraDecimal,
 }
 
 function propsPorTipo(tipo: InputTipo, senhaVisivel: boolean): TextInputProps {
@@ -50,6 +71,12 @@ function propsPorTipo(tipo: InputTipo, senhaVisivel: boolean): TextInputProps {
                 textContentType: "telephoneNumber",
                 maxLength: 15,
             }
+
+        case "moeda":
+            return { keyboardType: "numeric", maxLength: 12 }
+
+        case "decimal":
+            return { keyboardType: "decimal-pad", maxLength: 10 }
 
         case "texto":
         default:
@@ -96,9 +123,7 @@ export default function Input({
                         setFocado(false)
                         onBlur?.(e)
                     }}
-                    onChangeText={(texto) =>
-                        onChangeText?.(tipo === "telefone" ? mascaraTelefone(texto) : texto)
-                    }
+                    onChangeText={(texto) => onChangeText?.(MASCARAS[tipo]?.(texto) ?? texto)}
                     {...propsPorTipo(tipo, senhaVisivel)}
                     {...rest}
                 />

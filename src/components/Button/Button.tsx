@@ -9,11 +9,13 @@ type IconName = React.ComponentProps<typeof Ionicons>["name"]
 type CorTema = keyof typeof themes.colors
 
 export type ButtonFormato = "quadrado" | "arredondado"
+export type ButtonVariante = "preenchido" | "contorno"
 
 type ButtonProps = Omit<PressableProps, "style" | "children"> & {
     texto: string
     cor?: CorTema
     formato?: ButtonFormato
+    variante?: ButtonVariante
     icone?: IconName
     posicaoIcone?: "esquerda" | "direita"
     corTexto?: CorTema
@@ -38,6 +40,7 @@ export default function Button({
     texto,
     cor = "dourado",
     formato = "quadrado",
+    variante = "preenchido",
     icone,
     posicaoIcone = "esquerda",
     corTexto,
@@ -46,10 +49,17 @@ export default function Button({
     style: styleExterno,
     ...rest
 }: ButtonProps) {
-    const corFundo = themes.colors[cor]
-    const corFundoPressionado = COR_PRESSIONADA[cor] ?? corFundo
+    const contorno = variante === "contorno"
+
+    const corFundo = contorno ? "transparent" : themes.colors[cor]
+    const corFundoPressionado = contorno
+        ? themes.colors["campo-desabilitado"]
+        : COR_PRESSIONADA[cor] ?? themes.colors[cor]
+
     const corConteudo =
-        themes.colors[corTexto ?? COR_TEXTO_PADRAO[cor] ?? "azul-escuro"]
+        themes.colors[
+            corTexto ?? (contorno ? "azul-escuro" : COR_TEXTO_PADRAO[cor] ?? "azul-escuro")
+        ]
 
     const iconeEl = icone ? (
         <Ionicons
@@ -70,6 +80,7 @@ export default function Button({
                 style.base,
                 formato === "quadrado" ? style.quadrado : style.arredondado,
                 { backgroundColor: pressed ? corFundoPressionado : corFundo },
+                contorno && [style.contorno, { borderColor: themes.colors[cor] }],
                 disabled && style.desabilitado,
                 styleExterno,
             ]}
