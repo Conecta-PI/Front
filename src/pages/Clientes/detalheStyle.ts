@@ -1,0 +1,43 @@
+import { StyleSheet } from "react-native"
+import { themes } from "../../global/themes"
+
+export const style = StyleSheet.create({
+    conteudo: { padding: 8, gap: 8, paddingBottom: 24 },
+    perfil: {
+        alignItems: "center",
+        gap: 4,
+        padding: 16,
+        borderRadius: 16,
+        backgroundColor: themes.colors["azul-escuro"],
+    },
+    avatar: {
+        width: 64,
+        height: 64,
+        borderRadius: 32,
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: themes.colors["branco"],
+        borderWidth: 2,
+        borderColor: themes.colors["dourado"],
+    },
+    avatarTexto: { ...themes.typography.titulo2, color: themes.colors["azul-escuro"] },
+    nome: { ...themes.typography.titulo3, color: themes.colors["branco"], marginTop: 2 },
+    contato: { ...themes.typography.apoio, color: themes.colors["borda"] },
+    observacaoCampo: { flexDirection: "row", alignItems: "center", backgroundColor: themes.colors["branco"], borderRadius: 8, paddingHorizontal: 8, alignSelf: "stretch", marginTop: 8, height: 36 },
+    observacaoPrefixo: { ...themes.typography.apoio, fontFamily: "Poppins_600SemiBold", color: themes.colors["texto"] },
+    observacaoInput: { ...themes.typography.apoio, flex: 1, color: themes.colors["texto"], paddingVertical: 0, paddingHorizontal: 4, height: 36, textAlignVertical: "center" },
+    metricas: { flexDirection: "row", gap: 6 },
+    metrica: { flex: 1, padding: 8, borderRadius: 14, backgroundColor: themes.colors["branco"] },
+    rotulo: { ...themes.typography.nav, color: themes.colors["marrom-suave"] },
+    valor: { ...themes.typography.rotulo, color: themes.colors["texto"], marginTop: 4 },
+    tituloSecao: { ...themes.typography.rotulo, color: themes.colors["texto"], marginTop: 4 },
+    historico: { gap: 6 },
+    pedido: { minHeight: 48, paddingHorizontal: 10, paddingVertical: 7, borderRadius: 14, backgroundColor: themes.colors["branco"], flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+    pedidoId: { ...themes.typography.nav, fontFamily: "Poppins_600SemiBold", color: themes.colors["texto"] },
+    pedidoData: { ...themes.typography.nav, color: themes.colors["marrom-suave"] },
+    pedidoValor: { ...themes.typography.nav, fontFamily: "Poppins_600SemiBold", color: themes.colors["texto"] },
+    pedidoStatus: { ...themes.typography.nav, color: themes.colors["texto"], backgroundColor: themes.colors["fundo-de-sucesso"], borderRadius: 8, paddingHorizontal: 6, paddingVertical: 3 },
+    pedidoPendente: { color: themes.colors["alerta"], backgroundColor: themes.colors["fundo-de-alerta"] },
+    estado: { flex: 1, alignItems: "center", justifyContent: "center" },
+    mensagem: { ...themes.typography.apoio, color: themes.colors["texto-secundario"], textAlign: "center", padding: 16 },
+})
