@@ -17,6 +17,23 @@ export const style = StyleSheet.create({
         ...themes.typography.valorGrande,
         color: themes.colors["branco"],
     },
+    resumo: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+    },
+    contador: {
+        alignItems: "flex-end",
+        gap: 2,
+    },
+    contadorNumero: {
+        ...themes.typography.botao,
+        color: themes.colors["branco"],
+    },
+    contadorRotulo: {
+        ...themes.typography.apoio,
+        color: themes.colors["branco"],
+    },
     botoes: {
         flexDirection: "row",
         gap: 12,
@@ -24,7 +41,6 @@ export const style = StyleSheet.create({
     botao: { flex: 1 },
     rodape: {
         flexDirection: "row",
-        gap: 40,
         paddingHorizontal: 4,
     },
     info: { gap: 2 },

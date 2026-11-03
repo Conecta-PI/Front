@@ -10,7 +10,7 @@ type CardRecebidoProps = {
     titulo: string
     valor: number
     meta: number
-    pedidos: number
+    vendas: number
     onCobrar: () => void
     onReceber: () => void
 }
@@ -19,14 +19,20 @@ export default function CardRecebido({
     titulo,
     valor,
     meta,
-    pedidos,
+    vendas,
     onCobrar,
     onReceber,
 }: CardRecebidoProps) {
     return (
         <View style={style.card}>
             <Text style={style.titulo}>{titulo}</Text>
-            <Text style={style.valor}>{formatarMoeda(valor)}</Text>
+            <View style={style.resumo}>
+                <Text style={style.valor}>{formatarMoeda(valor)}</Text>
+                <View style={style.contador}>
+                    <Text style={style.contadorNumero}>{vendas}</Text>
+                    <Text style={style.contadorRotulo}>vendas</Text>
+                </View>
+            </View>
 
             <View style={style.botoes}>
                 <Button
@@ -49,11 +55,6 @@ export default function CardRecebido({
                 <View style={style.info}>
                     <Text style={style.rotulo}>Meta</Text>
                     <Text style={style.numero}>{formatarMoeda(meta)}</Text>
-                </View>
-
-                <View style={style.info}>
-                    <Text style={style.rotulo}>Pedidos</Text>
-                    <Text style={style.numero}>{pedidos}</Text>
                 </View>
             </View>
         </View>

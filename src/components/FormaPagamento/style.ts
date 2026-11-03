@@ -5,6 +5,7 @@ import { themes } from "../../global/themes"
 export const style = StyleSheet.create({
     card: {
         flex: 1,
+        minWidth: "46%",
         alignItems: "center",
         gap: 6,
         paddingVertical: 12,
