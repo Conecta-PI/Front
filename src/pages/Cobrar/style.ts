@@ -31,6 +31,7 @@ export const style = StyleSheet.create({
     },
     linhaPagamento: {
         flexDirection: "row",
+        flexWrap: "wrap",
         gap: 10,
     },
 })

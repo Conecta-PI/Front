@@ -6,16 +6,17 @@ import { Ionicons } from "@expo/vector-icons"
 import { style } from "./style"
 import { themes } from "../../global/themes"
 
-export type TipoPagamento = "pix" | "cartao" | "dinheiro"
+export type TipoPagamento = "pix" | "cartao" | "dinheiro" | "agendar"
 
 type IconName = React.ComponentProps<typeof Ionicons>["name"]
 
-export const PAGAMENTOS: TipoPagamento[] = ["pix", "cartao", "dinheiro"]
+export const PAGAMENTOS: TipoPagamento[] = ["pix", "cartao", "dinheiro", "agendar"]
 
 const CONFIG: Record<TipoPagamento, { texto: string; icone: IconName }> = {
     pix: { texto: "PIX", icone: "flash-outline" },
     cartao: { texto: "Cartão", icone: "card-outline" },
     dinheiro: { texto: "Dinheiro", icone: "cash-outline" },
+    agendar: { texto: "Agendar", icone: "calendar-outline" },
 }
 
 type FormaPagamentoProps = {

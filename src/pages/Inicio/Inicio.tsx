@@ -73,7 +73,7 @@ export default function Inicio() {
                         titulo={TITULO_RECEBIDO[periodo]}
                         valor={dados.recebido.valor}
                         meta={dados.recebido.meta}
-                        pedidos={dados.recebido.pedidos}
+                        vendas={dados.recebido.pedidos}
                         onCobrar={() => navigation.navigate("Cobrar")}
                         onReceber={() => navigation.navigate("Pedidos")}
                     />

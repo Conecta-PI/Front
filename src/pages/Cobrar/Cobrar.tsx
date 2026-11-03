@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useRef, useState } from "react"
 import { FlatList, Text, View } from "react-native"
-import { useFocusEffect } from "@react-navigation/native"
+import { NavigationProp, useFocusEffect, useNavigation } from "@react-navigation/native"
 
 import { style } from "./style"
 import AppLayout from "../../components/AppLayout/AppLayout"
@@ -14,9 +14,17 @@ import { useNavBar } from "../../contexts/NavBarContext"
 import { filtrarProdutos, listarClientes, listarProdutos } from "../../services/produtos"
 import type { DropdownOpcao } from "../../components/Dropdown/"
 import type { Produto } from "../../types/produto"
+import PagamentoCartao from "../PagamentoCartao/PagamentoCartao"
+import PagamentoDinheiro from "../PagamentoDinheiro/PagamentoDinheiro"
+import PagamentoPix from "../PagamentoPix/PagamentoPix"
+import AgendarPagamento from "../AgendarPagamento/AgendarPagamento"
+import AgendamentoConfirmado from "../AgendamentoConfirmado/AgendamentoConfirmado"
+import type { AppParamList } from "../../routes"
+import VendaConfirmada from "../VendaConfirmada/VendaConfirmada"
 
 export default function Cobrar() {
     const { setCobranca } = useNavBar()
+    const navigation = useNavigation<NavigationProp<AppParamList>>()
 
     const [busca, setBusca] = useState("")
     const [quantidades, setQuantidades] = useState<Record<string, number>>({})
@@ -26,6 +34,10 @@ export default function Cobrar() {
     const [clientes, setClientes] = useState<DropdownOpcao[]>([])
     const [carregando, setCarregando] = useState(true)
     const [erro, setErro] = useState<string | null>(null)
+    const [etapa, setEtapa] = useState<
+        "produtos" | "pagamento" | "agendamento-confirmado" | "venda-confirmada"
+    >("produtos")
+    const [dataAgendada, setDataAgendada] = useState<Date | null>(null)
 
     const produtos = useMemo(
         () => filtrarProdutos(todosProdutos, busca, "Todos"),
@@ -76,7 +88,25 @@ export default function Cobrar() {
     }
 
     function cobrar() {
-        
+        if (pagamento) {
+            setEtapa("pagamento")
+        }
+    }
+
+    function confirmarPagamento() {
+        setEtapa("venda-confirmada")
+    }
+
+    function confirmarAgendamento(data: Date) {
+        setDataAgendada(data)
+        setEtapa("agendamento-confirmado")
+    }
+
+    function iniciarNovaVenda() {
+        setQuantidades({})
+        setPagamento(null)
+        setDataAgendada(null)
+        setEtapa("produtos")
     }
 
     const cobrarRef = useRef(cobrar)
@@ -84,6 +114,11 @@ export default function Cobrar() {
 
     useFocusEffect(
         useCallback(() => {
+            if (etapa !== "produtos") {
+                setCobranca(null)
+                return () => setCobranca(null)
+            }
+
             setCobranca({
                 itens,
                 total,
@@ -92,8 +127,75 @@ export default function Cobrar() {
             })
 
             return () => setCobranca(null)
-        }, [itens, total, pagamento, setCobranca])
+        }, [etapa, itens, total, pagamento, setCobranca])
     )
+
+    if (etapa === "agendamento-confirmado" && dataAgendada) {
+        return (
+            <AgendamentoConfirmado
+                total={total}
+                dataEscolhida={dataAgendada}
+                onVerPendentes={() => navigation.navigate("Pedidos")}
+                onNovaVenda={iniciarNovaVenda}
+            />
+        )
+    }
+
+    if (etapa === "venda-confirmada" && pagamento && pagamento !== "agendar") {
+        return (
+            <VendaConfirmada
+                total={total}
+                pagamento={pagamento}
+                onVoltar={() => navigation.navigate("Inicio")}
+                onVerPedidos={() => navigation.navigate("Pedidos")}
+                onNovaVenda={iniciarNovaVenda}
+            />
+        )
+    }
+
+    if (etapa === "pagamento") {
+        if (pagamento === "agendar") {
+            return (
+                <AgendarPagamento
+                    total={total}
+                    onVoltar={() => setEtapa("produtos")}
+                    onConfirmar={confirmarAgendamento}
+                    onTrocarForma={() => setEtapa("produtos")}
+                />
+            )
+        }
+
+        if (pagamento === "pix") {
+            return (
+                <PagamentoPix
+                    total={total}
+                    onVoltar={() => setEtapa("produtos")}
+                    onConfirmar={confirmarPagamento}
+                    onTrocarForma={() => setEtapa("produtos")}
+                />
+            )
+        }
+
+        if (pagamento === "cartao") {
+            return (
+                <PagamentoCartao
+                    total={total}
+                    onVoltar={() => setEtapa("produtos")}
+                    onConfirmar={confirmarPagamento}
+                    onTrocarForma={() => setEtapa("produtos")}
+                />
+            )
+        }
+
+        return (
+            <PagamentoDinheiro
+                total={total}
+                onVoltar={() => setEtapa("produtos")}
+                onConfirmar={confirmarPagamento}
+                onTrocarForma={() => setEtapa("produtos")}
+            />
+        )
+    }
 
     return (
         <AppLayout
