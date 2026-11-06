@@ -1,11 +1,11 @@
-import React, { useMemo, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import { FlatList, Pressable, Text, View } from "react-native"
 
 import { style } from "./style"
 import AppLayout from "../../components/AppLayout/AppLayout"
 import PedidoCard from "../../components/PedidoCard/"
 import { listarPedidos } from "../../services/pedido"
-import type { StatusPedido } from "../../types/pedido"
+import type { Pedido, StatusPedido } from "../../types/pedido"
 
 type FiltroStatus = "todos" | StatusPedido
 
@@ -35,7 +35,22 @@ function Chip({ texto, ativo, estilo, estiloTexto, onPress }: ChipProps) {
 export default function Pedidos() {
     const [filtro, setFiltro] = useState<FiltroStatus>("todos")
 
-    const todos = useMemo(() => listarPedidos(), [])
+    const [todos, setTodos] = useState<Pedido[]>([])
+    const [erro, setErro] = useState<string | null>(null)
+
+    useEffect(() => {
+        let ativo = true
+        listarPedidos()
+            .then((lista) => {
+                if (ativo) setTodos(lista)
+            })
+            .catch((e) => {
+                if (ativo) setErro(e instanceof Error ? e.message : "Não foi possível carregar os pedidos.")
+            })
+        return () => {
+            ativo = false
+        }
+    }, [])
 
     const pendentes = todos.filter((p) => p.status === "pendente").length
     const pagos = todos.filter((p) => p.status === "pago").length
@@ -87,7 +102,7 @@ export default function Pedidos() {
                     />
                 )}
                 ListEmptyComponent={
-                    <Text style={style.vazio}>Nenhum pedido encontrado.</Text>
+                    <Text style={style.vazio}>{erro ?? "Nenhum pedido encontrado."}</Text>
                 }
             />
         </AppLayout>

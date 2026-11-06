@@ -1,5 +1,5 @@
-import React, { useState } from "react"
-import { ActivityIndicator, ScrollView, Text, View } from "react-native"
+import React, { useEffect, useMemo, useState } from "react"
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { NavigationProp, useNavigation } from "@react-navigation/native"
 
@@ -8,6 +8,8 @@ import { themes } from "../../global/themes"
 import { useDashboard } from "../../hooks/useDashboard"
 import type { Periodo } from "../../types/dashboard"
 import type { AppParamList, Destino } from "../../routes"
+import { listarClientes, listarProdutos } from "../../services/produtos"
+import { listarPedidos } from "../../services/pedido"
 
 import AppLayout from "../../components/AppLayout/AppLayout"
 import SeletorPeriodo from "../../components/SeletorPeriodo/"
@@ -34,14 +36,142 @@ const TITULO_RECEBIDO: Record<Periodo, string> = {
     mes: "Recebido no mês",
 }
 
+const normalizar = (valor: string | undefined) =>
+    (valor ?? "").toLocaleLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+
+const relevanciaBusca = (texto: string, termo: string) => {
+    const normalizado = normalizar(texto)
+    if (!termo) return 0
+    if (normalizado === termo) return 3
+    if (normalizado.startsWith(termo)) return 2
+    return 0
+}
+
 export default function Inicio() {
     const navigation = useNavigation<NavigationProp<AppParamList>>()
 
     const [periodo, setPeriodo] = useState<Periodo>("hoje")
     const [busca, setBusca] = useState("")
+    const [produtos, setProdutos] = useState<any[]>([])
+    const [clientes, setClientes] = useState<any[]>([])
+    const [pedidos, setPedidos] = useState<any[]>([])
     const { dados, erro } = useDashboard(periodo)
 
     const alertas = dados?.alertas.filter((a) => a.quantidade > 0) ?? []
+
+    useEffect(() => {
+        const termo = busca.trim()
+        if (!termo) {
+            setProdutos([])
+            setClientes([])
+            setPedidos([])
+            return
+        }
+
+        let ativo = true
+
+        Promise.all([
+            listarProdutos().catch(() => []),
+            listarClientes().catch(() => []),
+            listarPedidos().catch(() => []),
+        ])
+            .then(([listaProdutos, listaClientes, listaPedidos]) => {
+                if (!ativo) return
+                setProdutos(listaProdutos)
+                setClientes(listaClientes)
+                setPedidos(listaPedidos)
+            })
+            .catch(() => {
+                if (ativo) {
+                    setProdutos([])
+                    setClientes([])
+                    setPedidos([])
+                }
+            })
+
+        return () => {
+            ativo = false
+        }
+    }, [busca])
+
+    const resultadosBusca = useMemo(() => {
+        const termo = normalizar(busca.trim())
+        if (!termo) return []
+
+        const produtosEncontrados = produtos
+            .map((produto) => ({
+                ...produto,
+                relevancia: relevanciaBusca(produto.nome, termo),
+            }))
+            .filter((produto) => produto.relevancia > 0)
+            .sort((a, b) => b.relevancia - a.relevancia)
+            .slice(0, 3)
+            .map((produto) => ({
+                tipo: "Produto",
+                nome: produto.nome,
+                descricao: `${produto.categoria} • R$ ${produto.preco.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`,
+                destino: "DetalheProduto" as const,
+                params: { id: String(produto.id) },
+            }))
+
+        const clientesEncontrados = clientes
+            .map((cliente) => ({
+                ...cliente,
+                relevancia: relevanciaBusca(cliente.label, termo),
+            }))
+            .filter((cliente) => cliente.relevancia > 0)
+            .sort((a, b) => b.relevancia - a.relevancia)
+            .slice(0, 3)
+            .map((cliente) => ({
+                tipo: "Cliente",
+                nome: cliente.label,
+                descricao: "Cliente cadastrado",
+                destino: "DetalheCliente" as const,
+                params: { id: String(cliente.valor) },
+            }))
+
+        const pedidosEncontrados = pedidos
+            .map((pedido) => ({
+                ...pedido,
+                relevancia:
+                    Math.max(
+                        relevanciaBusca(pedido.cliente, termo),
+                        pedido.itens.reduce(
+                            (maior: number, item: any) =>
+                                Math.max(maior, relevanciaBusca(item.nome, termo)),
+                            0
+                        )
+                    ),
+            }))
+            .filter((pedido) => pedido.relevancia > 0)
+            .sort((a, b) => b.relevancia - a.relevancia)
+            .slice(0, 3)
+            .map((pedido) => ({
+                tipo: "Pedido",
+                nome: pedido.cliente,
+                descricao: `${pedido.data} • ${pedido.status}`,
+                destino: "Pedidos" as const,
+                params: undefined,
+            }))
+
+        const entregasEncontradas = (dados?.proximasEntregas ?? [])
+            .map((entrega) => ({
+                ...entrega,
+                relevancia: relevanciaBusca(entrega.nome, termo),
+            }))
+            .filter((entrega) => entrega.relevancia > 0)
+            .sort((a, b) => b.relevancia - a.relevancia)
+            .slice(0, 3)
+            .map((entrega) => ({
+                tipo: "Entrega",
+                nome: entrega.nome,
+                descricao: `${entrega.dia} • ${entrega.hora}`,
+                destino: "Encomendas" as const,
+                params: undefined,
+            }))
+
+        return [...produtosEncontrados, ...clientesEncontrados, ...pedidosEncontrados, ...entregasEncontradas]
+    }, [busca, clientes, dados, pedidos, produtos])
 
     return (
         <AppLayout
@@ -67,6 +197,45 @@ export default function Inicio() {
                     keyboardShouldPersistTaps="handled"
                     contentContainerStyle={style.conteudo}
                 >
+                    {busca.trim() && (
+                        <Secao titulo="Resultados da busca">
+                            {resultadosBusca.length > 0 ? (
+                                <View style={style.lista}>
+                                    {resultadosBusca.map((resultado, indice) => (
+                                        <Pressable
+                                            key={`${resultado.tipo}-${resultado.nome}-${indice}`}
+                                            onPress={() => {
+                                                if (resultado.destino === "DetalheProduto") {
+                                                    navigation.navigate("DetalheProduto", { id: resultado.params.id })
+                                                    return
+                                                }
+
+                                                if (resultado.destino === "DetalheCliente") {
+                                                    navigation.navigate("DetalheCliente", { id: resultado.params.id })
+                                                    return
+                                                }
+
+                                                navigation.navigate(resultado.destino)
+                                            }}
+                                            accessibilityRole="button"
+                                            accessibilityLabel={`Abrir ${resultado.tipo} ${resultado.nome}`}
+                                        >
+                                            <View style={style.resultadoBusca}>
+                                                <Text style={style.resultadoTipo}>{resultado.tipo}</Text>
+                                                <Text style={style.resultadoNome}>{resultado.nome}</Text>
+                                                <Text style={style.resultadoDescricao}>{resultado.descricao}</Text>
+                                            </View>
+                                        </Pressable>
+                                    ))}
+                                </View>
+                            ) : (
+                                <Text style={style.buscaVazia}>
+                                    Nenhum pedido, cliente ou produto encontrado para "{busca.trim()}".
+                                </Text>
+                            )}
+                        </Secao>
+                    )}
+
                     <SeletorPeriodo valor={periodo} onChange={setPeriodo} />
 
                     <CardRecebido

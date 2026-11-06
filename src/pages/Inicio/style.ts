@@ -29,4 +29,30 @@ export const style = StyleSheet.create({
     listaAlertas: {
         gap: 4,
     },
+    resultadoBusca: {
+        backgroundColor: "#FFFFFF",
+        borderRadius: 14,
+        paddingHorizontal: 14,
+        paddingVertical: 12,
+        borderWidth: 1,
+        borderColor: themes.colors["borda"],
+    },
+    resultadoTipo: {
+        ...themes.typography.rotulo,
+        color: themes.colors["marrom-suave"],
+        marginBottom: 4,
+    },
+    resultadoNome: {
+        ...themes.typography.titulo3,
+        color: themes.colors["azul-escuro"],
+        marginBottom: 2,
+    },
+    resultadoDescricao: {
+        ...themes.typography.corpo,
+        color: themes.colors["texto-secundario"],
+    },
+    buscaVazia: {
+        ...themes.typography.corpo,
+        color: themes.colors["texto-secundario"],
+    },
 })
