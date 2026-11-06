@@ -1,8 +1,9 @@
-import Constants from "expo-constants"
+﻿import Constants from "expo-constants"
 import * as SecureStore from "expo-secure-store"
 
 const host = Constants.expoConfig?.hostUri?.split(":")[0]
-const API_BASE_URL = `http://${host ?? "localhost"}:8080/api`
+const API_BASE_URL = "http://" + (host ?? "localhost") + ":8080/api"
+const IMAGE_BASE_URL = API_BASE_URL.replace(/\/api$/, "")
 const TOKEN_KEY = "conecta.access-token"
 const API_TIMEOUT_MS = 15000
 
@@ -31,7 +32,7 @@ async function requisitar<T>(
     if (autenticada) {
         const token = await SecureStore.getItemAsync(TOKEN_KEY)
         if (token) {
-            headers.set("Authorization", `Bearer ${token}`)
+            headers.set("Authorization", "Bearer " + token)
         }
     }
 
@@ -39,7 +40,7 @@ async function requisitar<T>(
     const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT_MS)
     let response: Response
     try {
-        response = await fetch(`${API_BASE_URL}${path}`, {
+        response = await fetch(API_BASE_URL + path, {
             ...init,
             headers,
             signal: controller.signal,
@@ -47,11 +48,11 @@ async function requisitar<T>(
     } catch (error) {
         if (error instanceof Error && error.name === "AbortError") {
             throw new Error(
-                `A API não respondeu em ${API_TIMEOUT_MS / 1000} segundos. Verifique se o back está ativo e acessível pela rede.`
+                "A API não respondeu em " + (API_TIMEOUT_MS / 1000) + " segundos. Verifique se o back está ativo e acessível pela rede."
             )
         }
         throw new Error(
-            `Não foi possível acessar a API em ${API_BASE_URL}. Verifique se o back está ativo e se celular e computador estão na mesma rede.`,
+            "Não foi possível acessar a API em " + API_BASE_URL + ". Verifique se o back está ativo e se celular e computador estão na mesma rede.",
             { cause: error }
         )
     } finally {
@@ -59,7 +60,7 @@ async function requisitar<T>(
     }
 
     if (!response.ok) {
-        let message = `A API respondeu com erro (${response.status}).`
+        let message = "A API respondeu com erro (" + response.status + ")."
         try {
             const body: unknown = await response.json()
             if (body && typeof body === "object") {
@@ -73,7 +74,12 @@ async function requisitar<T>(
         throw new ApiError(message, response.status)
     }
 
-    return response.json() as Promise<T>
+    if (response.status === 204) {
+        return undefined as T
+    }
+
+    const texto = await response.text()
+    return (texto ? JSON.parse(texto) : undefined) as T
 }
 
 export function apiGet<T>(path: string): Promise<T> {
@@ -94,4 +100,20 @@ export function apiPatch<T>(path: string, body: unknown): Promise<T> {
 
 export function apiDelete<T = void>(path: string): Promise<T> {
     return requisitar<T>(path, { method: "DELETE" }, true)
+}
+
+export function resolverUrlImagem(valor?: string | null): string | undefined {
+    if (!valor) {
+        return undefined
+    }
+
+    if (/^https?:\/\//i.test(valor) || valor.startsWith("data:")) {
+        return valor
+    }
+
+    if (valor.startsWith("/")) {
+        return IMAGE_BASE_URL + valor
+    }
+
+    return valor
 }
