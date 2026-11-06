@@ -1,19 +1,40 @@
-import React from "react"
+import React, { useState } from "react"
 import { Text, View } from "react-native"
 import { useNavigation } from "@react-navigation/native"
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
 
 import Button from "../../components/Button/Button"
+import Input from "../../components/Input/Input"
 import RecuperacaoCard from "../../components/RecuperacaoCard/RecuperacaoCard"
 import RecuperacaoHeader from "../../components/RecuperacaoHeader/RecuperacaoHeader"
 import type { RootStackParamList } from "../../routes"
+import { solicitarCodigoRecuperacao } from "../../services/auth"
 import { style } from "./style"
+
+const EMAIL_VALIDO = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export default function RecuperarSenha() {
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>()
+    const [email, setEmail] = useState("")
+    const [erro, setErro] = useState("")
+    const [enviando, setEnviando] = useState(false)
 
-    function escolherCanal(contato: string) {
-        navigation.navigate("CodigoSeguranca", { contato })
+    async function enviarCodigo() {
+        const emailLimpo = email.trim()
+        if (!EMAIL_VALIDO.test(emailLimpo)) {
+            setErro("Informe um e-mail válido")
+            return
+        }
+
+        setEnviando(true)
+        try {
+            const mensagem = await solicitarCodigoRecuperacao(emailLimpo)
+            navigation.navigate("CodigoSeguranca", { email: emailLimpo, mensagem })
+        } catch (e) {
+            setErro(e instanceof Error ? e.message : "Não foi possível enviar o código.")
+        } finally {
+            setEnviando(false)
+        }
     }
 
     return (
@@ -21,20 +42,25 @@ export default function RecuperarSenha() {
             <RecuperacaoHeader />
             <RecuperacaoCard>
                 <View style={style.introducao}>
-                    <Text style={style.titulo}>Como deseja receber o{"\n"}código de verificação?</Text>
+                    <Text style={style.titulo}>Recuperar senha</Text>
                     <Text style={style.descricao}>
-                        Escolha um dos meios abaixo para recuperar sua senha.
+                        Informe o e-mail da sua conta para receber o código de verificação.
                     </Text>
                 </View>
 
-                <Button
-                    texto="E-mail"
-                    onPress={() => escolherCanal("p***@docesnaturais.com")}
+                <Input
+                    tipo="email"
+                    label="E-mail"
+                    placeholder="seu@email.com"
+                    value={email}
+                    onChangeText={(valor) => {
+                        setEmail(valor)
+                        setErro("")
+                    }}
+                    erro={erro}
                 />
-                <Text style={style.ajuda}>Enviaremos o código para o e-mail{"\n"}cadastrado na sua conta.</Text>
 
-                <Button texto="SMS" onPress={() => escolherCanal("11900000000")} />
-                <Text style={style.ajuda}>Enviaremos o código por mensagem de texto{"\n"}para o celular cadastrado.</Text>
+                <Button texto={enviando ? "Enviando..." : "Enviar código"} onPress={enviarCodigo} />
             </RecuperacaoCard>
         </View>
     )

@@ -9,24 +9,17 @@ import Button from "../../components/Button/Button"
 import RecuperacaoCard from "../../components/RecuperacaoCard/RecuperacaoCard"
 import RecuperacaoHeader from "../../components/RecuperacaoHeader/RecuperacaoHeader"
 import type { RootStackParamList } from "../../routes"
+import { solicitarCodigoRecuperacao, verificarCodigoRecuperacao } from "../../services/auth"
 import { style } from "./style"
 
-function formatarContato(contato?: string) {
-    if (!contato) return "p***@docesnaturais.com"
-    if (!contato.includes("@")) {
-        const telefone = contato.replace(/\D/g, "")
-        if (telefone.length === 11) {
-            return `(${telefone.slice(0, 2)}) *****-${telefone.slice(7)}`
-        }
-    }
-
-    return contato
-}
 
 export default function CodigoSeguranca() {
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>()
     const { params } = useRoute<RouteProp<RootStackParamList, "CodigoSeguranca">>()
-    const [codigo, setCodigo] = useState(["", "", "", ""])
+    const [codigo, setCodigo] = useState(["", "", "", "", "", ""])
+    const [erro, setErro] = useState("")
+    const [mensagem, setMensagem] = useState(params.mensagem ?? "")
+    const [carregando, setCarregando] = useState(false)
     const refs = useRef<Array<TextInputInstance | null>>([])
 
     function alterarCodigo(valor: string, indice: number) {
@@ -34,11 +27,42 @@ export default function CodigoSeguranca() {
         const novoCodigo = [...codigo]
         novoCodigo[indice] = digito
         setCodigo(novoCodigo)
-        if (digito && indice < 3) refs.current[indice + 1]?.focus()
+        setErro("")
+        if (digito && indice < 5) refs.current[indice + 1]?.focus()
     }
 
-    function verificar() {
-        if (codigo.every(Boolean)) navigation.navigate("NovaSenha")
+
+    async function verificar() {
+        if (carregando) return
+        if (!codigo.every(Boolean)) {
+            setErro("Informe os 6 dígitos do código")
+            return
+        }
+
+        const codigoCompleto = codigo.join("")
+        setCarregando(true)
+        try {
+            const valido = await verificarCodigoRecuperacao(params.email, codigoCompleto)
+            if (valido) {
+                navigation.navigate("NovaSenha", { email: params.email, codigo: codigoCompleto })
+            } else {
+                setErro("Código inválido. Confira e tente novamente.")
+            }
+        } catch (e) {
+            setErro(e instanceof Error ? e.message : "Não foi possível verificar o código.")
+        } finally {
+            setCarregando(false)
+        }
+    }
+
+    async function reenviar() {
+        try {
+            setMensagem(await solicitarCodigoRecuperacao(params.email))
+            setCodigo(["", "", "", "", "", ""])
+            setErro("")
+        } catch (e) {
+            setErro(e instanceof Error ? e.message : "Não foi possível reenviar o código.")
+        }
     }
 
     return (
@@ -47,9 +71,9 @@ export default function CodigoSeguranca() {
             <RecuperacaoCard>
                 <Text style={style.titulo}>Código de segurança</Text>
                 <Text style={style.descricao}>
-                    Digite o código de 4 dígitos enviado{"\n"}para:
+                    Digite o código de 6 dígitos enviado{"\n"}para:
                 </Text>
-                <Text style={style.contato}>{formatarContato(params?.contato)}</Text>
+                <Text style={style.contato}>{params.email}</Text>
 
                 <View style={style.codigo}>
                     {codigo.map((digito, indice) => (
@@ -72,11 +96,14 @@ export default function CodigoSeguranca() {
                     ))}
                 </View>
 
-                <Pressable onPress={() => undefined} hitSlop={8} style={style.reenviar}>
+                {!!mensagem && <Text style={style.descricao}>{mensagem}</Text>}
+                {!!erro && <Text style={style.descricao}>{erro}</Text>}
+
+                <Pressable onPress={reenviar} hitSlop={8} style={style.reenviar}>
                     <Text style={style.reenviarTexto}>Reenviar código</Text>
                 </Pressable>
 
-                <Button texto="Verificar" onPress={verificar} style={style.botao} />
+                <Button texto={carregando ? "Verificando..." : "Verificar"} onPress={verificar} style={style.botao} />
             </RecuperacaoCard>
         </View>
     )

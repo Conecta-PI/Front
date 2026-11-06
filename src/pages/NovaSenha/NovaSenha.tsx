@@ -1,23 +1,28 @@
 import React, { useState } from "react"
 import { Text, View } from "react-native"
-import { useNavigation } from "@react-navigation/native"
+import { useNavigation, useRoute } from "@react-navigation/native"
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
+import type { RouteProp } from "@react-navigation/native"
 
 import Button from "../../components/Button/Button"
 import Input from "../../components/Input/Input"
 import RecuperacaoCard from "../../components/RecuperacaoCard/RecuperacaoCard"
 import RecuperacaoHeader from "../../components/RecuperacaoHeader/RecuperacaoHeader"
 import type { RootStackParamList } from "../../routes"
+import { redefinirSenha } from "../../services/auth"
 import { style } from "./style"
 
 export default function NovaSenha() {
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>()
+    const { params } = useRoute<RouteProp<RootStackParamList, "NovaSenha">>()
+    const [enviando, setEnviando] = useState(false)
     const [senha, setSenha] = useState("")
     const [confirmacao, setConfirmacao] = useState("")
     const [erroSenha, setErroSenha] = useState("")
     const [erroConfirmacao, setErroConfirmacao] = useState("")
 
-    function redefinir() {
+    async function redefinir() {
+        if (enviando) return
         const novaErroSenha = senha.length < 8 ? "A senha deve ter no mínimo 8 caracteres" : ""
         const novaErroConfirmacao =
             senha !== confirmacao ? "As senhas não coincidem" : ""
@@ -26,7 +31,15 @@ export default function NovaSenha() {
         setErroConfirmacao(novaErroConfirmacao)
 
         if (!novaErroSenha && !novaErroConfirmacao) {
-            navigation.replace("RecuperacaoSucesso")
+            setEnviando(true)
+            try {
+                await redefinirSenha(params.email, params.codigo, senha)
+                navigation.replace("RecuperacaoSucesso")
+            } catch (e) {
+                setErroConfirmacao(e instanceof Error ? e.message : "Não foi possível redefinir a senha.")
+            } finally {
+                setEnviando(false)
+            }
         }
     }
 

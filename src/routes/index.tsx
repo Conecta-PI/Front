@@ -41,8 +41,8 @@ export type RootStackParamList = {
     Login: undefined
     Cadastro: undefined
     RecuperarSenha: undefined
-    CodigoSeguranca: { contato?: string }
-    NovaSenha: undefined
+    CodigoSeguranca: { email: string; mensagem?: string }
+    NovaSenha: { email: string; codigo: string }
     RecuperacaoSucesso: undefined
     Main: undefined
     Estoque: undefined
