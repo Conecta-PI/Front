@@ -4,6 +4,12 @@ Aplicativo mobile (React Native + Expo + TypeScript) para pequenos negócios org
 
 Este documento explica **como o projeto está organizado**, **o que cada página faz** e **como usar cada componente**, com atenção especial aos componentes que têm mais de um tipo (`Header`, `ProdutoCard`, `Input`, `Button`, `NavBar`, `AlertaAtencao`, `MetricaCard` e `FormaPagamento`).
 
+## Dados e ambiente local
+
+O frontend consome o backend em `http://<IP-DO-COMPUTADOR>:8080/api`; não use `localhost` no celular físico. O dashboard e os produtos carregam dinamicamente do backend, então o app depende de que a API esteja ativa e que o banco tenha dados válidos.
+
+Se por acaso o banco estiver vazio, o backend injeta automaticamente uma base mínima de demonstração em memória ou em MySQL. Para uma base mais completa, siga o fluxo do `Backend/README.md` (seção "Seed manual do MySQL"): o script `Backend/scripts/seed-mysql.sql` não roda sozinho e só deve ser executado em base vazia. O mesmo vale para imagens: o banco guarda o caminho do recurso e o backend serve os arquivos de `src/main/resources/static/images/produtos`.
+
 ---
 
 ## Sumário
