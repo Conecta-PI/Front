@@ -42,3 +42,9 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# logs
+*.log
+
+# Claude Code (local)
+.claude/
