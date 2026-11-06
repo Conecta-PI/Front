@@ -1,4 +1,4 @@
-import React from "react"
+﻿import React from "react"
 import { ActivityIndicator, ScrollView, Text, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { CommonActions, NavigationProp, useNavigation } from "@react-navigation/native"
@@ -6,6 +6,7 @@ import { CommonActions, NavigationProp, useNavigation } from "@react-navigation/
 import { style } from "./style"
 import { themes } from "../../global/themes"
 import { usePerfil } from "../../hooks/usePerfil"
+import { limparToken } from "../../services/api"
 import type { AppParamList, Destino } from "../../routes"
 
 import AppLayout from "../../components/AppLayout/AppLayout"
@@ -30,8 +31,8 @@ export default function Mais() {
     const navigation = useNavigation<NavigationProp<AppParamList>>()
     const { perfil } = usePerfil()
 
-    function sair() {
-        // TODO: limpar a sessão (token) antes de sair
+    async function sair() {
+        await limparToken()
         navigation.dispatch(
             CommonActions.reset({ index: 0, routes: [{ name: "Login" }] })
         )
@@ -125,3 +126,4 @@ export default function Mais() {
         </AppLayout>
     )
 }
+

@@ -3,8 +3,10 @@ import React from "react"
 import { Image, Pressable, ScrollView, Text, TextInput, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { useNavigation } from "@react-navigation/native"
+import type { NavigationProp } from "@react-navigation/native"
 
 import { style } from "./style"
+import type { AppParamList } from "../../routes"
 import { themes } from "../../global/themes"
 
 import Logo from "../../assets/images/logo.png"
@@ -171,6 +173,7 @@ function HeaderInicio({
     ...busca
 }: Extract<HeaderProps, { tipo: "inicio" }>) {
     const primeiroNome = nome?.trim().split(/\s+/)[0]
+    const navigation = useNavigation<NavigationProp<AppParamList>>()
 
     return (
         <View style={style.containerInicio}>
@@ -184,9 +187,15 @@ function HeaderInicio({
                     {!!primeiroNome && <Text style={style.nomeInicio}>{primeiroNome}</Text>}
                 </View>
 
-                <View style={style.avatar}>
-                    <Text style={style.inicial}>{nome ? nome.charAt(0).toUpperCase() : ""}</Text>
-                </View>
+                <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="Abrir perfil"
+                    onPress={() => navigation.navigate("Mais")}
+                >
+                    <View style={style.avatar}>
+                        <Text style={style.inicial}>{nome ? nome.charAt(0).toUpperCase() : ""}</Text>
+                    </View>
+                </Pressable>
             </View>
 
             <Busca

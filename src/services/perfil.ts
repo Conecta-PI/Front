@@ -1,16 +1,10 @@
+﻿import { apiGet, apiPatch } from "./api"
 import type { Perfil } from "../types/perfil"
 
 export async function buscarPerfil(): Promise<Perfil> {
-    await new Promise((r) => setTimeout(r, 400))
+    return apiGet<Perfil>("/perfil")
+}
 
-    return {
-        nome: "Paulo Mendes",
-        negocio: "Doces do Paulo",
-        premium: true,
-        telefone: "(11) 99876-5432",
-        email: "paulo@docesdopaulo.com",
-        cnpj: "12.345.678/0001-90",
-        chavePix: "docesdopaulo@pix",
-        resumo: { pedidos: 12, clientes: 48, produtos: 6 },
-    }
+export async function atualizarPerfil(dados: Partial<Perfil>): Promise<Perfil> {
+    return apiPatch<Perfil>("/perfil", dados)
 }
