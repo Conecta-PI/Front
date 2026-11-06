@@ -13,7 +13,6 @@ import BottomSheet from "../../components/BottomSheet"
 import type { Cliente } from "../../types/cliente"
 import type { RootStackParamList } from "../../routes"
 import { criarCliente, listarClientes } from "../../services/clientes"
-import { CLIENTES_MOCK } from "../../services/clientesMocks"
 
 type Filtro = "todos" | "frequentes" | "pendencia"
 
@@ -39,31 +38,6 @@ function formatarData(data?: string | null) {
     const dataFormatada = new Date(data)
     if (Number.isNaN(dataFormatada.getTime())) return `Último: ${data}`
     return `Último: ${dataFormatada.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}`
-}
-
-function adicionarResumoDemonstracao(cliente: Cliente): Cliente {
-    const mock = CLIENTES_MOCK.find((item) => item.nome.trim().toLocaleLowerCase() === cliente.nome.trim().toLocaleLowerCase())
-    if (!mock) return cliente
-
-    return {
-        ...cliente,
-        totalGasto: cliente.totalGasto ?? mock.totalGasto,
-        quantidadePedidos: cliente.quantidadePedidos ?? mock.quantidadePedidos,
-        ultimoPedido: cliente.ultimoPedido ?? mock.ultimoPedido,
-        temPendencia: cliente.temPendencia ?? mock.temPendencia,
-    }
-}
-
-function combinarClientesComDemonstracao(clientes: Cliente[]) {
-    const clientesReais = clientes
-        .filter((cliente) => CLIENTES_MOCK.some((mock) => mock.nome.trim().toLocaleLowerCase() === cliente.nome.trim().toLocaleLowerCase()))
-        .map(adicionarResumoDemonstracao)
-    const nomesExistentes = new Set(clientesReais.map((cliente) => cliente.nome.trim().toLocaleLowerCase()))
-    const clientesMockados = CLIENTES_MOCK.filter(
-        (cliente) => !nomesExistentes.has(cliente.nome.trim().toLocaleLowerCase())
-    )
-
-    return [...clientesReais, ...clientesMockados]
 }
 
 export default function Clientes() {
@@ -98,7 +72,7 @@ export default function Clientes() {
         setCarregando(true)
         listarClientes()
             .then((dados) => {
-                setClientes(combinarClientesComDemonstracao(dados))
+                setClientes(dados)
                 setErro(null)
             })
             .catch((error: unknown) => {

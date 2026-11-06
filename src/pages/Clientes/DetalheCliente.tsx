@@ -7,12 +7,11 @@ import { themes } from "../../global/themes"
 import AppLayout from "../../components/AppLayout/AppLayout"
 import type { Cliente } from "../../types/cliente"
 import type { RootStackParamList } from "../../routes"
-import { buscarCliente } from "../../services/clientes"
+import { buscarDetalheCliente, atualizarObservacaoCliente, type PedidoCliente } from "../../services/clientes"
 import { atualizarCliente } from "../../services/clientes"
 import Input from "../../components/Input/Input"
 import Button from "../../components/Button/Button"
 import BottomSheet from "../../components/BottomSheet"
-import { obterClienteMock, PedidoCliente } from "../../services/clientesMocks"
 
 export default function DetalheCliente() {
     const { params } = useRoute<RouteProp<RootStackParamList, "DetalheCliente">>()
@@ -29,21 +28,10 @@ export default function DetalheCliente() {
 
     useEffect(() => {
         let ativo = true
-        const clienteMock = obterClienteMock(params.id)
-        if (clienteMock) {
-            setCliente(clienteMock)
-            setPedidos(clienteMock.pedidos)
-            setNome(clienteMock.nome)
-            setTelefone(clienteMock.telefone)
-            setEmail(clienteMock.email)
-            setObservacao(clienteMock.observacao ?? "")
-            setCarregando(false)
-            return () => { ativo = false }
-        }
-
-        buscarCliente(params.id)
-            .then((dados) => {
-                if (ativo && dados) {
+        buscarDetalheCliente(params.id)
+            .then(({ cliente: dados, pedidos: historico }) => {
+                if (ativo) {
+                    setPedidos(historico)
                     setCliente(dados)
                     setNome(dados.nome)
                     setTelefone(dados.telefone)
@@ -88,6 +76,11 @@ export default function DetalheCliente() {
                             placeholderTextColor={themes.colors["texto-secundario"]}
                             style={style.observacaoInput}
                             maxLength={160}
+                            onEndEditing={() => {
+                                atualizarObservacaoCliente(cliente.id, observacao).catch((error: unknown) =>
+                                    Alert.alert("Não foi possível salvar a observação", error instanceof Error ? error.message : "Tente novamente.")
+                                )
+                            }}
                             returnKeyType="done"
                             accessibilityLabel="Observação do cliente"
                         />
@@ -118,7 +111,7 @@ export default function DetalheCliente() {
                         setSalvando(true)
                         try {
                             const atualizado = await atualizarCliente(cliente.id, { nome: nome.trim(), telefone: telefone.trim(), email: email.trim() })
-                            setCliente(atualizado)
+                            setCliente((atual) => (atual ? { ...atual, ...atualizado } : atualizado))
                             setEditarVisivel(false)
                         } catch (error) {
                             Alert.alert("Não foi possível salvar", error instanceof Error ? error.message : "Tente novamente.")
