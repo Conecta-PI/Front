@@ -1,4 +1,4 @@
-import { apiGet, ApiError } from "./api"
+import { apiGet, apiPost, ApiError, resolverUrlImagem } from "./api"
 
 import type {
     NovoProduto,
@@ -6,8 +6,6 @@ import type {
     Produto,
     RespostaCadastro,
 } from "../types/produto"
-
-const atraso = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 export const CATEGORIAS = ["Todos", "Bolo de pote", "Lanche", "Doce"]
 
@@ -18,10 +16,15 @@ type ProdutoApi = {
     categoria: string
     descricao: string
     estoque: number
+    foto?: string | null
 }
 
 function mapearProduto(produto: ProdutoApi): Produto {
-    return { ...produto, id: String(produto.id) }
+    return {
+        ...produto,
+        id: String(produto.id),
+        imagem: resolverUrlImagem(produto.foto),
+    }
 }
 
 export async function listarProdutos(): Promise<Produto[]> {
@@ -62,55 +65,62 @@ export function filtrarProdutos(produtos: Produto[], busca: string, categoria: s
     )
 }
 
-const SIMULAR_ERRO = false
+const CATEGORIAS_PADRAO = ["Bolo de pote", "Lanche", "Doce", "Salgado"]
 
 export async function listarCategoriasProduto(): Promise<OpcaoCategoria[]> {
-    await atraso(300)
+    let categorias: string[] = []
+    try {
+        categorias = await apiGet<string[]>("/produtos/categorias")
+    } catch {
+        categorias = []
+    }
 
-    // const categorias = await apiGet<{ id: number; nome: string }[]>("/categorias")
-    // return categorias.map((c) => ({ valor: String(c.id), label: c.nome }))
-    return [
-        { valor: "bolo-de-pote", label: "Bolo de pote" },
-        { valor: "lanche", label: "Lanche" },
-        { valor: "doce", label: "Doce" },
-        { valor: "salgado", label: "Salgado" },
-    ]
+    const unicas = [...categorias]
+    for (const padrao of CATEGORIAS_PADRAO) {
+        if (!unicas.some((c) => normalizar(c) === normalizar(padrao))) {
+            unicas.push(padrao)
+        }
+    }
+
+    return unicas.map((categoria) => ({ valor: categoria, label: categoria }))
+}
+
+function lerComoDataUrl(uri: string): Promise<string> {
+    return fetch(uri)
+        .then((resposta) => resposta.blob())
+        .then(
+            (blob) =>
+                new Promise<string>((resolve, reject) => {
+                    const leitor = new FileReader()
+                    leitor.onloadend = () => resolve(String(leitor.result))
+                    leitor.onerror = () => reject(leitor.error)
+                    leitor.readAsDataURL(blob)
+                })
+        )
 }
 
 export async function cadastrarProduto(dados: NovoProduto): Promise<RespostaCadastro> {
-    await atraso(900)
+    try {
+        const foto = dados.foto ? await lerComoDataUrl(dados.foto) : null
 
-    // const form = new FormData()
-    // form.append("nome", dados.nome)
-    // form.append("categoria", dados.categoria)
-    // form.append("preco", String(dados.preco))
-    // form.append("descricao", dados.descricao)
-    // form.append("preparo", dados.preparo)
-    // form.append("rendimento", dados.rendimento)
-    // form.append("ativo", String(dados.ativo))
-    // form.append("ingredientes", JSON.stringify(dados.ingredientes))
-    // if (dados.foto) {
-    //     form.append("foto", { uri: dados.foto, name: "produto.jpg", type: "image/jpeg" } as any)
-    // }
-    //
-    // try {
-    //     const r = await fetch(`${API_URL}/produtos`, {
-    //         method: "POST",
-    //         headers: { Authorization: `Bearer ${token}` },
-    //         body: form,
-    //     })
-    //     const json = await r.json()
-    //     return {
-    //         sucesso: r.ok,
-    //         mensagem: json.mensagem ?? (r.ok ? "O novo produto já aparece no cardápio." : "Tente novamente."),
-    //     }
-    // } catch {
-    //     return { sucesso: false, mensagem: "Sem conexão. Verifique sua internet e tente novamente." }
-    // }
+        await apiPost("/produtos", {
+            nome: dados.nome,
+            categoria: dados.categoria,
+            preco: dados.preco,
+            descricao: dados.descricao,
+            preparo: dados.preparo,
+            rendimento: dados.rendimento,
+            ingredientes: dados.ingredientes,
+            ativo: dados.ativo,
+            estoque: 0,
+            foto,
+        })
 
-    if (SIMULAR_ERRO) {
-        return { sucesso: false, mensagem: "Já existe um produto com esse nome." }
+        return { sucesso: true, mensagem: "O novo produto já aparece no cardápio." }
+    } catch (error) {
+        return {
+            sucesso: false,
+            mensagem: error instanceof Error ? error.message : "Tente novamente.",
+        }
     }
-
-    return { sucesso: true, mensagem: "O novo produto já aparece no cardápio." }
 }
