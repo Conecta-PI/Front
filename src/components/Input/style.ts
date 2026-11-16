@@ -47,4 +47,16 @@ export const style = StyleSheet.create({
         color: themes.colors["erro"],
         marginTop: 6,
     },
+
+    fieldMultilinha: {
+        height: "auto",
+        minHeight: 104,
+        alignItems: "flex-start",
+        paddingVertical: 12,
+    },
+
+    inputMultilinha: {
+        minHeight: 80,
+        textAlignVertical: "top",
+    },
 })

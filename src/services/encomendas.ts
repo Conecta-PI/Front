@@ -1,5 +1,11 @@
 import { apiGet, apiPatch, apiPost } from "./api"
 
+import type { NovaEncomenda } from "../types/encomenda"
+
+type EncomendaApi = {
+    id: number
+}
+
 export type EncomendaItem = {
     nomeProduto: string
     quantidade: number
@@ -26,8 +32,21 @@ export async function buscarEncomenda(id: string | number): Promise<Encomenda> {
     return apiGet<Encomenda>(`/encomendas/${encodeURIComponent(String(id))}`)
 }
 
-export async function criarEncomenda(payload: Partial<Encomenda>): Promise<Encomenda> {
-    return apiPost<Encomenda>("/encomendas", payload)
+export async function criarEncomenda(dados: NovaEncomenda): Promise<{ id: string }> {
+    const encomenda = await apiPost<EncomendaApi>("/encomendas", {
+        clienteId: Number(dados.clienteId),
+        itens: dados.itens.map((item) => ({
+            produtoId: Number(item.produtoId),
+            quantidade: item.quantidade, 
+        })),
+        dataEntrega: dados.dataEntrega,
+        horario: dados.horario,
+        tipoEntrega: dados.tipoEntrega,
+        sinalPago: dados.sinalPago,
+        observacoes: dados.observacoes,
+    })
+
+    return { id: String(encomenda.id) }
 }
 
 export async function atualizarStatusEncomenda(id: string | number, status: string): Promise<Encomenda> {

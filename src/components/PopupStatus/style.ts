@@ -52,4 +52,10 @@ export const style = StyleSheet.create({
         alignSelf: "stretch",
         marginTop: 8,
     },
+
+    botoes: {
+        alignSelf: "stretch",
+        gap: 8,
+        marginTop: 8,
+    },
 })

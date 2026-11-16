@@ -32,6 +32,7 @@ import Fornecedores from "../pages/Fornecedores/Fornecedores"
 import FichaTecnica from "../pages/FichaTecnica/FichaTecnica"
 import Relatorios from "../pages/Relatorios/Relatorios"
 import Configuracoes from "../pages/Configuracoes/Configuracoes"
+import NovaEncomenda from "../pages/NovaEncomenda/NovaEncomenda"
 
 import { NavBarProvider, useNavBar } from "../contexts/NavBarContext"
 
@@ -58,6 +59,7 @@ export type RootStackParamList = {
     FichaTecnica: undefined
     Relatorios: undefined
     Configuracoes: undefined
+    NovaEncomenda: { clienteId: string; clienteNome: string }
 }
 
 export type RootTabParamList = {
@@ -72,7 +74,7 @@ export type AppParamList = RootStackParamList & RootTabParamList
 
 export type Destino = Exclude<
     keyof AppParamList,
-    "Login" | "Cadastro" | "Main" | "DetalheEncomenda" | "DetalheProduto"
+    "Login" | "Cadastro" | "Main" | "DetalheEncomenda" | "DetalheProduto" | "DetalheCliente" | "NovaEncomenda"
 >
 
 const Stack = createNativeStackNavigator<RootStackParamList>()
@@ -131,6 +133,7 @@ export default function Routes() {
                     <Stack.Screen name="FichaTecnica" component={FichaTecnica} />
                     <Stack.Screen name="Relatorios" component={Relatorios} />
                     <Stack.Screen name="Configuracoes" component={Configuracoes} />
+                    <Stack.Screen name="NovaEncomenda" component={NovaEncomenda} />
                 </Stack.Navigator>
             </NavigationContainer>
         </NavBarProvider>

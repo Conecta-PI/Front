@@ -29,6 +29,7 @@ const COR_PRESSIONADA: Partial<Record<CorTema, string>> = {
     "bege-claro": themes.colors["campo-desabilitado"],
     "branco": themes.colors["bege-claro"],
     "marrom-suave": "#76523D",
+    "erro": "#8F1F19",
 }
 
 const COR_TEXTO_PADRAO: Partial<Record<CorTema, CorTema>> = {

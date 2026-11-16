@@ -40,4 +40,20 @@ export const style = StyleSheet.create({
     pedidoPendente: { color: themes.colors["alerta"], backgroundColor: themes.colors["fundo-de-alerta"] },
     estado: { flex: 1, alignItems: "center", justifyContent: "center" },
     mensagem: { ...themes.typography.apoio, color: themes.colors["texto-secundario"], textAlign: "center", padding: 16 },
+
+    tela: {
+        flex: 1,
+    },
+    rodape: {
+        paddingHorizontal: 16,
+        paddingTop: 12,
+        gap: 8,
+    },
+    linhaBotoes: {
+        flexDirection: "row",
+        gap: 8,
+    },
+    metade: {
+        flex: 1,
+    },
 })

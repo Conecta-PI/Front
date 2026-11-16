@@ -5,12 +5,23 @@ import { Ionicons } from "@expo/vector-icons"
 import { style } from "./style"
 import { themes } from "../../global/themes"
 
-export type InputTipo = "email" | "senha" | "texto" | "telefone" | "moeda" | "decimal"
+type IconName = React.ComponentProps<typeof Ionicons>["name"]
+
+export type InputTipo =
+    | "email"
+    | "senha"
+    | "texto"
+    | "telefone"
+    | "moeda"
+    | "decimal"
+    | "data"
+    | "hora"
 
 export type InputProps = Omit<TextInputProps, "secureTextEntry" | "keyboardType"> & {
     tipo: InputTipo
     label?: string
     erro?: string
+    icone?: IconName  
 }
 
 function mascaraTelefone(valor: string) {
@@ -38,10 +49,26 @@ function mascaraDecimal(valor: string) {
     return resto.length > 0 ? `${inteiro},${resto.join("").slice(0, 3)}` : inteiro
 }
 
+function mascaraData(valor: string) {
+    const d = valor.replace(/\D/g, "").slice(0, 8)
+
+    if (d.length <= 2) return d
+    if (d.length <= 4) return `${d.slice(0, 2)}/${d.slice(2)}`
+    return `${d.slice(0, 2)}/${d.slice(2, 4)}/${d.slice(4)}`
+}
+
+function mascaraHora(valor: string) {
+    const d = valor.replace(/\D/g, "").slice(0, 4)
+
+    return d.length <= 2 ? d : `${d.slice(0, 2)}:${d.slice(2)}`
+}
+
 const MASCARAS: Partial<Record<InputTipo, (valor: string) => string>> = {
     telefone: mascaraTelefone,
     moeda: mascaraMoeda,
     decimal: mascaraDecimal,
+    data: mascaraData,
+    hora: mascaraHora,
 }
 
 function propsPorTipo(tipo: InputTipo, senhaVisivel: boolean): TextInputProps {
@@ -78,6 +105,12 @@ function propsPorTipo(tipo: InputTipo, senhaVisivel: boolean): TextInputProps {
         case "decimal":
             return { keyboardType: "decimal-pad", maxLength: 10 }
 
+        case "data":
+            return { keyboardType: "number-pad", maxLength: 10 }
+
+        case "hora":
+            return { keyboardType: "number-pad", maxLength: 5 }
+
         case "texto":
         default:
             return {
@@ -91,6 +124,7 @@ export default function Input({
     tipo,
     label,
     erro,
+    icone,
     onFocus,
     onBlur,
     onChangeText,
@@ -100,6 +134,7 @@ export default function Input({
     const [senhaVisivel, setSenhaVisivel] = useState(false)
 
     const isSenha = tipo === "senha"
+    const multilinha = !!rest.multiline
 
     return (
         <View style={style.container}>
@@ -108,12 +143,13 @@ export default function Input({
             <View
                 style={[
                     style.field,
+                    multilinha && style.fieldMultilinha,
                     focado && style.fieldFocado,
                     !!erro && style.fieldErro,
                 ]}
             >
                 <TextInput
-                    style={style.input}
+                    style={[style.input, multilinha && style.inputMultilinha]}
                     placeholderTextColor={themes.colors["texto-secundario"]}
                     onFocus={(e) => {
                         setFocado(true)
@@ -142,6 +178,12 @@ export default function Input({
                             color={themes.colors["azul-escuro"]}
                         />
                     </Pressable>
+                )}
+
+                {!isSenha && !!icone && (
+                    <View style={style.eye}>
+                        <Ionicons name={icone} size={20} color={themes.colors["marrom-suave"]} />
+                    </View>
                 )}
             </View>
 
