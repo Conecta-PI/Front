@@ -122,7 +122,7 @@ export default function DetalheCliente() {
         try {
             await excluirCliente(cliente!.id)
             setPopup((p) => ({ ...p, visivel: false }))
-            navigation.goBack()  
+            navigation.goBack()
         } catch (error) {
             setPopup({
                 visivel: true,
@@ -205,6 +205,7 @@ export default function DetalheCliente() {
                             formato="arredondado"
                             cor="branco"
                             corTexto="texto"
+                            textoEmUmaLinha
                             style={style.metade}
                             onPress={pedirConfirmacao}
                         />

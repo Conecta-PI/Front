@@ -55,5 +55,6 @@ export const style = StyleSheet.create({
     },
     metade: {
         flex: 1,
+        minWidth: 0,
     },
 })
