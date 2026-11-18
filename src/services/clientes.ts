@@ -1,3 +1,4 @@
+
 import { apiDelete, apiGet, apiPatch, apiPost } from "./api"
 import type { Cliente } from "../types/cliente"
 
@@ -7,6 +8,7 @@ type ClienteApi = {
     telefone: string
     email: string
     observacoes?: string | null
+    ativo?: boolean
     totalGasto?: number
     quantidadePedidos?: number
     ultimoPedido?: string | null
@@ -29,7 +31,11 @@ type ResumoApi = {
 }
 
 function mapearCliente({ id, observacoes, ...resto }: ClienteApi): Cliente {
-    return { ...resto, id: String(id), observacao: observacoes ?? "" }
+    return {
+        ...resto,
+        id: String(id),
+        observacao: observacoes ?? "",
+    }
 }
 
 function formatarDataCurta(iso: string): string {
@@ -37,11 +43,19 @@ function formatarDataCurta(iso: string): string {
     return dia + "/" + mes
 }
 
+// Lista clientes ativos
 export async function listarClientes(): Promise<Cliente[]> {
     const clientes = await apiGet<ClienteApi[]>("/clientes")
     return clientes.map(mapearCliente)
 }
 
+// Lista clientes inativos
+export async function listarClientesInativos(): Promise<Cliente[]> {
+    const clientes = await apiGet<ClienteApi[]>("/clientes/inativos")
+    return clientes.map(mapearCliente)
+}
+
+// Busca detalhes e histórico do cliente
 export async function buscarDetalheCliente(
     id: string
 ): Promise<{ cliente: Cliente; pedidos: PedidoCliente[] }> {
@@ -69,20 +83,43 @@ export async function buscarDetalheCliente(
 
 export type DadosCliente = Pick<Cliente, "nome" | "telefone" | "email">
 
+// Cria cliente
 export async function criarCliente(dados: DadosCliente): Promise<Cliente> {
     const cliente = await apiPost<ClienteApi>("/clientes", dados)
     return mapearCliente(cliente)
 }
 
-export async function atualizarCliente(id: string, dados: DadosCliente): Promise<Cliente> {
-    const cliente = await apiPatch<ClienteApi>(`/clientes/${encodeURIComponent(id)}`, dados)
+// Atualiza cliente
+export async function atualizarCliente(
+    id: string,
+    dados: DadosCliente
+): Promise<Cliente> {
+    const cliente = await apiPatch<ClienteApi>(
+        `/clientes/${encodeURIComponent(id)}`,
+        dados
+    )
     return mapearCliente(cliente)
 }
 
-export async function atualizarObservacaoCliente(id: string, observacao: string): Promise<void> {
-    await apiPatch(`/clientes/${encodeURIComponent(id)}/observacao`, { observacao })
+// Atualiza observação
+export async function atualizarObservacaoCliente(
+    id: string,
+    observacao: string
+): Promise<void> {
+    await apiPatch(`/clientes/${encodeURIComponent(id)}/observacao`, {
+        observacao,
+    })
 }
 
+// Reativa cliente inativo
+export async function reativarCliente(id: string): Promise<void> {
+    await apiPatch<void>(
+        `/clientes/${encodeURIComponent(id)}/reativar`,
+        {}
+    )
+}
+
+// Exclusão lógica (desativa o cliente)
 export function excluirCliente(id: string): Promise<void> {
     return apiDelete<void>(`/clientes/${encodeURIComponent(id)}`)
 }
