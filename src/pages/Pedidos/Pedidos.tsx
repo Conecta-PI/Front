@@ -1,5 +1,7 @@
-import React, { useEffect, useMemo, useState } from "react"
+
+import React, { useCallback, useMemo, useState } from "react"
 import { FlatList, Pressable, Text, View } from "react-native"
+import { useFocusEffect } from "@react-navigation/native"
 
 import { style } from "./style"
 import AppLayout from "../../components/AppLayout/AppLayout"
@@ -34,23 +36,37 @@ function Chip({ texto, ativo, estilo, estiloTexto, onPress }: ChipProps) {
 
 export default function Pedidos() {
     const [filtro, setFiltro] = useState<FiltroStatus>("todos")
-
     const [todos, setTodos] = useState<Pedido[]>([])
     const [erro, setErro] = useState<string | null>(null)
 
-    useEffect(() => {
-        let ativo = true
-        listarPedidos()
-            .then((lista) => {
-                if (ativo) setTodos(lista)
-            })
-            .catch((e) => {
-                if (ativo) setErro(e instanceof Error ? e.message : "Não foi possível carregar os pedidos.")
-            })
-        return () => {
-            ativo = false
-        }
-    }, [])
+    useFocusEffect(
+        useCallback(() => {
+            let ativo = true
+
+            setErro(null)
+
+            listarPedidos()
+                .then((lista) => {
+                    if (ativo) {
+                        setTodos(lista)
+                        setErro(null)
+                    }
+                })
+                .catch((e: unknown) => {
+                    if (ativo) {
+                        setErro(
+                            e instanceof Error
+                                ? e.message
+                                : "Não foi possível carregar os pedidos."
+                        )
+                    }
+                })
+
+            return () => {
+                ativo = false
+            }
+        }, [])
+    )
 
     const pendentes = todos.filter((p) => p.status === "pendente").length
     const pagos = todos.filter((p) => p.status === "pago").length
@@ -70,6 +86,7 @@ export default function Pedidos() {
                     estiloTexto={style.chipTextoTodos}
                     onPress={() => setFiltro("todos")}
                 />
+
                 <Chip
                     texto={`Pendentes (${pendentes})`}
                     ativo={filtro === "pendente"}
@@ -77,6 +94,7 @@ export default function Pedidos() {
                     estiloTexto={style.chipTextoPendentes}
                     onPress={() => setFiltro("pendente")}
                 />
+
                 <Chip
                     texto={`Pagos (${pagos})`}
                     ativo={filtro === "pago"}
@@ -102,7 +120,9 @@ export default function Pedidos() {
                     />
                 )}
                 ListEmptyComponent={
-                    <Text style={style.vazio}>{erro ?? "Nenhum pedido encontrado."}</Text>
+                    <Text style={style.vazio}>
+                        {erro ?? "Nenhum pedido encontrado."}
+                    </Text>
                 }
             />
         </AppLayout>
