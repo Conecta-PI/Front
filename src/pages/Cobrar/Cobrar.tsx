@@ -1,5 +1,6 @@
+
 import React, { useCallback, useMemo, useRef, useState } from "react"
-import { FlatList, Text, View } from "react-native"
+import { Alert, FlatList, Text, View } from "react-native"
 import { NavigationProp, useFocusEffect, useNavigation } from "@react-navigation/native"
 
 import { style } from "./style"
@@ -12,6 +13,8 @@ import FormaPagamento, {
 } from "../../components/FormaPagamento/"
 import { useNavBar } from "../../contexts/NavBarContext"
 import { filtrarProdutos, listarClientes, listarProdutos } from "../../services/produtos"
+import { criarVenda } from "../../services/vendas"
+import type { VendaResponse } from "../../services/vendas"
 import type { DropdownOpcao } from "../../components/Dropdown/"
 import type { Produto } from "../../types/produto"
 import PagamentoCartao from "../PagamentoCartao/PagamentoCartao"
@@ -34,10 +37,21 @@ export default function Cobrar() {
     const [clientes, setClientes] = useState<DropdownOpcao[]>([])
     const [carregando, setCarregando] = useState(true)
     const [erro, setErro] = useState<string | null>(null)
+    const [vendaCriada, setVendaCriada] = useState<VendaResponse | null>(null)
+
+    // Impede duas requisições simultâneas de venda.
+    const enviandoVenda = useRef(false)
+
     const [etapa, setEtapa] = useState<
         "produtos" | "pagamento" | "agendamento-confirmado" | "venda-confirmada"
     >("produtos")
+
     const [dataAgendada, setDataAgendada] = useState<Date | null>(null)
+
+    const clienteSelecionado = useMemo(
+        () => clientes.find((item) => item.valor === cliente) ?? null,
+        [clientes, cliente]
+    )
 
     const produtos = useMemo(
         () => filtrarProdutos(todosProdutos, busca, "Todos"),
@@ -48,10 +62,10 @@ export default function Cobrar() {
         let itens = 0
         let total = 0
 
-        for (const p of todosProdutos) {
-            const q = quantidades[p.id] ?? 0
-            itens += q
-            total += q * p.preco
+        for (const produto of todosProdutos) {
+            const quantidade = quantidades[produto.id] ?? 0
+            itens += quantidade
+            total += quantidade * produto.preco
         }
 
         return { itens, total }
@@ -72,7 +86,11 @@ export default function Cobrar() {
                 })
                 .catch((error: unknown) => {
                     if (ativo) {
-                        setErro(error instanceof Error ? error.message : "Erro ao carregar dados.")
+                        setErro(
+                            error instanceof Error
+                                ? error.message
+                                : "Erro ao carregar dados."
+                        )
                         setCarregando(false)
                     }
                 })
@@ -84,17 +102,99 @@ export default function Cobrar() {
     )
 
     function alterarQuantidade(id: string, quantidade: number) {
-        setQuantidades((atual) => ({ ...atual, [id]: quantidade }))
+        setQuantidades((atual) => ({
+            ...atual,
+            [id]: quantidade,
+        }))
     }
 
     function cobrar() {
-        if (pagamento) {
-            setEtapa("pagamento")
+        if (itens === 0) {
+            Alert.alert("Atenção", "Adicione pelo menos um produto.")
+            return
         }
+
+        if (!clienteSelecionado) {
+            Alert.alert(
+                "Cliente obrigatório",
+                "Selecione um cliente antes de continuar."
+            )
+            return
+        }
+
+        if (!pagamento) {
+            Alert.alert("Atenção", "Selecione uma forma de pagamento.")
+            return
+        }
+
+        setEtapa("pagamento")
     }
 
-    function confirmarPagamento() {
-        setEtapa("venda-confirmada")
+    async function confirmarPagamento() {
+        if (enviandoVenda.current) {
+            return
+        }
+
+        if (!clienteSelecionado) {
+            Alert.alert("Cliente obrigatório", "Selecione um cliente.")
+            setEtapa("produtos")
+            return
+        }
+
+        if (!pagamento || pagamento === "agendar") {
+            Alert.alert("Atenção", "Forma de pagamento inválida.")
+            return
+        }
+
+        const clienteId = Number(clienteSelecionado.valor)
+
+        const itensVenda = todosProdutos
+            .filter((produto) => (quantidades[produto.id] ?? 0) > 0)
+            .map((produto) => ({
+                produtoId: Number(produto.id),
+                quantidade: quantidades[produto.id],
+            }))
+
+        if (!Number.isSafeInteger(clienteId) || clienteId <= 0) {
+            Alert.alert("Erro", "O ID do cliente selecionado é inválido.")
+            return
+        }
+
+        if (
+            itensVenda.length === 0 ||
+            itensVenda.some(
+                (item) =>
+                    !Number.isSafeInteger(item.produtoId) ||
+                    item.produtoId <= 0 ||
+                    !Number.isSafeInteger(item.quantidade) ||
+                    item.quantidade <= 0
+            )
+        ) {
+            Alert.alert("Erro", "Confira os produtos e as quantidades.")
+            return
+        }
+
+        enviandoVenda.current = true
+
+        try {
+            const resposta = await criarVenda({
+                clienteId,
+                formaPagamento: pagamento,
+                itens: itensVenda,
+            })
+
+            setVendaCriada(resposta)
+            setEtapa("venda-confirmada")
+        } catch (error: unknown) {
+            Alert.alert(
+                "Não foi possível registrar a venda",
+                error instanceof Error
+                    ? error.message
+                    : "Ocorreu um erro ao salvar a venda. Tente novamente."
+            )
+        } finally {
+            enviandoVenda.current = false
+        }
     }
 
     function confirmarAgendamento(data: Date) {
@@ -104,8 +204,11 @@ export default function Cobrar() {
 
     function iniciarNovaVenda() {
         setQuantidades({})
+        setCliente(null)
         setPagamento(null)
         setDataAgendada(null)
+        setVendaCriada(null)
+        enviandoVenda.current = false
         setEtapa("produtos")
     }
 
@@ -122,12 +225,12 @@ export default function Cobrar() {
             setCobranca({
                 itens,
                 total,
-                desabilitado: itens === 0 || !pagamento,
+                desabilitado: itens === 0 || !pagamento || !cliente,
                 onCobrar: () => cobrarRef.current(),
             })
 
             return () => setCobranca(null)
-        }, [etapa, itens, total, pagamento, setCobranca])
+        }, [etapa, itens, total, pagamento, cliente, setCobranca])
     )
 
     if (etapa === "agendamento-confirmado" && dataAgendada) {
@@ -141,11 +244,13 @@ export default function Cobrar() {
         )
     }
 
-    if (etapa === "venda-confirmada" && pagamento && pagamento !== "agendar") {
+    if (etapa === "venda-confirmada" && vendaCriada && pagamento && pagamento !== "agendar") {
         return (
             <VendaConfirmada
-                total={total}
+                total={vendaCriada.total}
                 pagamento={pagamento}
+                clienteNome={vendaCriada.cliente}
+                vendaId={vendaCriada.id}
                 onVoltar={() => navigation.navigate("Inicio")}
                 onVerPedidos={() => navigation.navigate("Pedidos")}
                 onNovaVenda={iniciarNovaVenda}
@@ -169,6 +274,7 @@ export default function Cobrar() {
             return (
                 <PagamentoPix
                     total={total}
+                    clienteNome={clienteSelecionado?.label ?? ""}
                     onVoltar={() => setEtapa("produtos")}
                     onConfirmar={confirmarPagamento}
                     onTrocarForma={() => setEtapa("produtos")}
@@ -180,6 +286,7 @@ export default function Cobrar() {
             return (
                 <PagamentoCartao
                     total={total}
+                    clienteNome={clienteSelecionado?.label ?? ""}
                     onVoltar={() => setEtapa("produtos")}
                     onConfirmar={confirmarPagamento}
                     onTrocarForma={() => setEtapa("produtos")}
@@ -190,6 +297,7 @@ export default function Cobrar() {
         return (
             <PagamentoDinheiro
                 total={total}
+                clienteNome={clienteSelecionado?.label ?? ""}
                 onVoltar={() => setEtapa("produtos")}
                 onConfirmar={confirmarPagamento}
                 onTrocarForma={() => setEtapa("produtos")}
@@ -208,7 +316,7 @@ export default function Cobrar() {
         >
             <FlatList
                 data={produtos}
-                keyExtractor={(p) => p.id}
+                keyExtractor={(produto) => produto.id}
                 numColumns={2}
                 columnWrapperStyle={style.coluna}
                 contentContainerStyle={style.lista}
@@ -219,17 +327,23 @@ export default function Cobrar() {
                         tipo="quantidade"
                         produto={item}
                         quantidade={quantidades[item.id] ?? 0}
-                        onChangeQuantidade={(q) => alterarQuantidade(item.id, q)}
+                        onChangeQuantidade={(quantidade) =>
+                            alterarQuantidade(item.id, quantidade)
+                        }
                     />
                 )}
                 ListEmptyComponent={
                     <Text style={style.vazio}>
-                        {erro ?? (carregando ? "Carregando produtos..." : "Nenhum produto encontrado.")}
+                        {erro ??
+                            (carregando
+                                ? "Carregando produtos..."
+                                : "Nenhum produto encontrado.")}
                     </Text>
                 }
                 ListFooterComponent={
                     <View style={style.formulario}>
                         {erro && <Text style={style.vazio}>{erro}</Text>}
+
                         <Dropdown
                             label="Cliente"
                             placeholder="Selecione o cliente"

@@ -1,3 +1,4 @@
+
 import React from "react"
 import { ScrollView, Text, View } from "react-native"
 
@@ -8,6 +9,7 @@ import { style } from "./style"
 
 type PagamentoCartaoProps = {
     total: number
+    clienteNome: string
     onVoltar: () => void
     onConfirmar: () => void
     onTrocarForma: () => void
@@ -15,6 +17,7 @@ type PagamentoCartaoProps = {
 
 export default function PagamentoCartao({
     total,
+    clienteNome,
     onVoltar,
     onConfirmar,
     onTrocarForma,
@@ -37,7 +40,7 @@ export default function PagamentoCartao({
 
                     <View style={style.linhaCliente}>
                         <Text style={style.rotulo}>Cliente</Text>
-                        <Text style={style.cliente}>Cliente não informado</Text>
+                        <Text style={style.cliente}>{clienteNome}</Text>
                     </View>
                 </View>
 

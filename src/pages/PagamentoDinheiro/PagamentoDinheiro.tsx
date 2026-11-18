@@ -1,3 +1,4 @@
+
 import React, { useMemo, useState } from "react"
 import { Pressable, ScrollView, Text, View } from "react-native"
 
@@ -8,6 +9,7 @@ import { style } from "./style"
 
 type PagamentoDinheiroProps = {
     total: number
+    clienteNome: string
     onVoltar: () => void
     onConfirmar: () => void
     onTrocarForma: () => void
@@ -17,6 +19,7 @@ const VALORES_SUGERIDOS = [20, 50, 100, 200]
 
 export default function PagamentoDinheiro({
     total,
+    clienteNome,
     onVoltar,
     onConfirmar,
     onTrocarForma,
@@ -46,7 +49,7 @@ export default function PagamentoDinheiro({
 
                     <View style={style.linhaCliente}>
                         <Text style={style.rotulo}>Cliente</Text>
-                        <Text style={style.cliente}>Cliente não informado</Text>
+                        <Text style={style.cliente}>{clienteNome}</Text>
                     </View>
                 </View>
 

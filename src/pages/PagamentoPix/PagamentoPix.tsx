@@ -1,3 +1,4 @@
+
 import React, { useMemo, useState } from "react"
 import { Pressable, ScrollView, Text, View } from "react-native"
 import * as Clipboard from "expo-clipboard"
@@ -10,6 +11,7 @@ import { style } from "./style"
 
 type PagamentoPixProps = {
     total: number
+    clienteNome: string
     onVoltar: () => void
     onConfirmar: () => void
     onTrocarForma: () => void
@@ -20,11 +22,13 @@ const PIX_COPIA_E_COLA =
 
 export default function PagamentoPix({
     total,
+    clienteNome,
     onVoltar,
     onConfirmar,
     onTrocarForma,
 }: PagamentoPixProps) {
     const [copiado, setCopiado] = useState(false)
+
     const codigoPix = useMemo(
         () => PIX_COPIA_E_COLA.replace("40.00", total.toFixed(2)),
         [total]
@@ -53,7 +57,7 @@ export default function PagamentoPix({
 
                     <View style={style.linhaCliente}>
                         <Text style={style.rotulo}>Cliente</Text>
-                        <Text style={style.cliente}>Cliente não informado</Text>
+                        <Text style={style.cliente}>{clienteNome}</Text>
                     </View>
                 </View>
 
@@ -72,7 +76,9 @@ export default function PagamentoPix({
                         <Text style={style.codigoTexto} numberOfLines={1}>
                             {codigoPix}
                         </Text>
-                        <Text style={style.copiar}>{copiado ? "Copiado" : "Copiar"}</Text>
+                        <Text style={style.copiar}>
+                            {copiado ? "Copiado" : "Copiar"}
+                        </Text>
                     </Pressable>
                 </View>
 
@@ -107,7 +113,11 @@ function QrCodeSimulado({ valor }: { valor: string }) {
     const modulo = 5
 
     return (
-        <Svg width={tamanho * modulo} height={tamanho * modulo} viewBox={`0 0 ${tamanho * modulo} ${tamanho * modulo}`}>
+        <Svg
+            width={tamanho * modulo}
+            height={tamanho * modulo}
+            viewBox={`0 0 ${tamanho * modulo} ${tamanho * modulo}`}
+        >
             <Rect width="100%" height="100%" fill="#FFFFFF" />
             {matriz.map((linha, y) =>
                 linha.map(
@@ -129,7 +139,10 @@ function QrCodeSimulado({ valor }: { valor: string }) {
 }
 
 function criarMatriz(valor: string, tamanho: number) {
-    const matriz = Array.from({ length: tamanho }, () => Array(tamanho).fill(false))
+    const matriz = Array.from(
+        { length: tamanho },
+        () => Array(tamanho).fill(false)
+    )
 
     function marcador(inicioX: number, inicioY: number) {
         for (let y = 0; y < 7; y += 1) {
@@ -146,15 +159,18 @@ function criarMatriz(valor: string, tamanho: number) {
     marcador(0, tamanho - 7)
 
     let indice = 0
+
     for (let y = 0; y < tamanho; y += 1) {
         for (let x = 0; x < tamanho; x += 1) {
             const reservado =
                 (x < 8 && y < 8) ||
                 (x >= tamanho - 8 && y < 8) ||
                 (x < 8 && y >= tamanho - 8)
+
             if (!reservado) {
                 const codigo = valor.charCodeAt(indice % valor.length)
-                matriz[y][x] = (codigo + x * 3 + y * 5 + indice) % 7 < 3
+                matriz[y][x] =
+                    (codigo + x * 3 + y * 5 + indice) % 7 < 3
                 indice += 1
             }
         }

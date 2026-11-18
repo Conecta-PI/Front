@@ -1,3 +1,4 @@
+
 import React from "react"
 import { ScrollView, Text, View } from "react-native"
 
@@ -10,6 +11,8 @@ import { style } from "./style"
 type VendaConfirmadaProps = {
     total: number
     pagamento: Exclude<TipoPagamento, "agendar">
+    clienteNome: string
+    vendaId: number | string
     onVoltar: () => void
     onVerPedidos: () => void
     onNovaVenda: () => void
@@ -24,17 +27,19 @@ const LABEL_PAGAMENTO: Record<Exclude<TipoPagamento, "agendar">, string> = {
 export default function VendaConfirmada({
     total,
     pagamento,
+    clienteNome,
+    vendaId,
     onVoltar,
     onVerPedidos,
     onNovaVenda,
 }: VendaConfirmadaProps) {
     const agora = new Date()
+
     const dataHora = `${String(agora.getDate()).padStart(2, "0")}/${String(
         agora.getMonth() + 1
-    ).padStart(2, "0")}/${agora.getFullYear()} · ${String(agora.getHours()).padStart(
-        2,
-        "0"
-    )}:${String(agora.getMinutes()).padStart(2, "0")}`
+    ).padStart(2, "0")}/${agora.getFullYear()} · ${String(
+        agora.getHours()
+    ).padStart(2, "0")}:${String(agora.getMinutes()).padStart(2, "0")}`
 
     return (
         <AppLayout
@@ -53,11 +58,17 @@ export default function VendaConfirmada({
                 </View>
 
                 <Text style={style.titulo}>Pagamento confirmado!</Text>
-                <Text style={style.subtitulo}>Pago com {LABEL_PAGAMENTO[pagamento]}</Text>
+                <Text style={style.subtitulo}>
+                    Pago com {LABEL_PAGAMENTO[pagamento]}
+                </Text>
 
                 <View style={style.card}>
                     <Text style={style.negocio}>Conecta Doces & Naturais</Text>
-                    <Text style={style.detalheVenda}>Pedido #1025 · {dataHora}</Text>
+
+                    <Text style={style.detalheVenda}>
+                        Pedido #{vendaId} · {dataHora}
+                    </Text>
+
                     <View style={style.divisor} />
 
                     <View style={style.itens}>
@@ -66,9 +77,22 @@ export default function VendaConfirmada({
                     </View>
 
                     <View style={style.divisor} />
-                    <Linha rotulo="Valor total" valor={formatarMoeda(total)} destaque />
-                    <Linha rotulo="Forma de pagamento" valor={LABEL_PAGAMENTO[pagamento]} />
-                    <Linha rotulo="Cliente" valor="Cliente não informado" />
+
+                    <Linha
+                        rotulo="Valor total"
+                        valor={formatarMoeda(total)}
+                        destaque
+                    />
+
+                    <Linha
+                        rotulo="Forma de pagamento"
+                        valor={LABEL_PAGAMENTO[pagamento]}
+                    />
+
+                    <Linha
+                        rotulo="Cliente"
+                        valor={clienteNome}
+                    />
                 </View>
 
                 <View style={style.acoes}>
@@ -78,6 +102,7 @@ export default function VendaConfirmada({
                         onPress={onVerPedidos}
                         textoEmUmaLinha
                     />
+
                     <Button
                         texto="Nova venda"
                         cor="borda"
@@ -102,8 +127,13 @@ function Linha({
 }) {
     return (
         <View style={style.linha}>
-            <Text style={[style.rotulo, destaque && style.rotuloDestaque]}>{rotulo}</Text>
-            <Text style={[style.valor, destaque && style.valorDestaque]}>{valor}</Text>
+            <Text style={[style.rotulo, destaque && style.rotuloDestaque]}>
+                {rotulo}
+            </Text>
+
+            <Text style={[style.valor, destaque && style.valorDestaque]}>
+                {valor}
+            </Text>
         </View>
     )
 }
