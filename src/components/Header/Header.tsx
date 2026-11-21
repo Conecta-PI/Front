@@ -35,6 +35,7 @@ export type HeaderProps =
           tipo: "inicio"
           nome?: string
           negocio?: string
+          foto?: string
       } & BuscaProps)
 
     // cobrar: voltar + título + busca
@@ -62,6 +63,7 @@ export type HeaderProps =
           nome?: string
           negocio?: string
           premium?: boolean
+          foto?: string
           onEditar?: () => void
       }
 
@@ -170,6 +172,7 @@ function HeaderLogo({
 function HeaderInicio({
     nome,
     negocio,
+    foto,
     ...busca
 }: Extract<HeaderProps, { tipo: "inicio" }>) {
     const primeiroNome = nome?.trim().split(/\s+/)[0]
@@ -193,7 +196,11 @@ function HeaderInicio({
                     onPress={() => navigation.navigate("Mais")}
                 >
                     <View style={style.avatar}>
-                        <Text style={style.inicial}>{nome ? nome.charAt(0).toUpperCase() : ""}</Text>
+                        {foto ? (
+                            <Image source={{ uri: foto }} style={{ width: "100%", height: "100%", borderRadius: 24 }} resizeMode="cover" />
+                        ) : (
+                            <Text style={style.inicial}>{nome ? nome.charAt(0).toUpperCase() : ""}</Text>
+                        )}
                     </View>
                 </Pressable>
             </View>
@@ -271,14 +278,19 @@ function HeaderPerfil({
     nome,
     negocio,
     premium,
+    foto,
     onEditar,
 }: Extract<HeaderProps, { tipo: "perfil" }>) {
     return (
         <View style={style.containerPerfil}>
             <View style={style.avatarGrande}>
-                <Text style={style.inicialGrande}>
-                    {nome ? nome.charAt(0).toUpperCase() : ""}
-                </Text>
+                {foto ? (
+                    <Image source={{ uri: foto }} style={{ width: "100%", height: "100%", borderRadius: 42 }} resizeMode="cover" />
+                ) : (
+                    <Text style={style.inicialGrande}>
+                        {nome ? nome.charAt(0).toUpperCase() : ""}
+                    </Text>
+                )}
 
                 {!!onEditar && (
                     <Pressable

@@ -1,12 +1,12 @@
-﻿import React from "react"
+import React, { useCallback } from "react"
 import { ActivityIndicator, ScrollView, Text, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
-import { CommonActions, NavigationProp, useNavigation } from "@react-navigation/native"
+import { CommonActions, NavigationProp, useFocusEffect, useNavigation } from "@react-navigation/native"
 
 import { style } from "./style"
 import { themes } from "../../global/themes"
 import { usePerfil } from "../../hooks/usePerfil"
-import { limparToken } from "../../services/api"
+import { limparToken, resolverUrlImagem } from "../../services/api"
 import type { AppParamList, Destino } from "../../routes"
 
 import AppLayout from "../../components/AppLayout/AppLayout"
@@ -29,7 +29,11 @@ const MENU: { icone: IconName; texto: string; destino: Destino }[] = [
 
 export default function Mais() {
     const navigation = useNavigation<NavigationProp<AppParamList>>()
-    const { perfil } = usePerfil()
+    const { perfil, recarregarPerfil } = usePerfil()
+
+    useFocusEffect(useCallback(() => {
+        recarregarPerfil().catch(() => undefined)
+    }, [recarregarPerfil]))
 
     async function sair() {
         await limparToken()
@@ -45,9 +49,8 @@ export default function Mais() {
                 nome: perfil?.nome,
                 negocio: perfil?.negocio,
                 premium: perfil?.premium,
-                onEditar: () => {
-                    // TODO: abrir a tela de edição de perfil
-                },
+                foto: resolverUrlImagem(perfil?.foto),
+                onEditar: () => navigation.navigate("EditarPerfil"),
             }}
         >
             {!perfil ? (

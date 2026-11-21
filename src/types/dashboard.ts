@@ -3,7 +3,7 @@ export type TipoAlerta = "critico" | "aviso" | "informativo"
 export type TipoMetrica = "lucro" | "custo" | "investido"
 
 export type Dashboard = {
-    usuario: { nome: string; negocio: string }
+    usuario: { nome: string; negocio: string; foto?: string | null }
     recebido: { valor: number; meta: number; pedidos: number }
     alertas: { tipo: TipoAlerta; quantidade: number }[]
     proximasEntregas: { id: string; nome: string; dia: string; hora: string }[]

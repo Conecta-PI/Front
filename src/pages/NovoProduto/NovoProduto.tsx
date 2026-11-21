@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react"
 import { KeyboardAvoidingView, ScrollView, Text, View } from "react-native"
-import { NavigationProp, ParamListBase, useNavigation } from "@react-navigation/native"
+import { NavigationProp, ParamListBase, RouteProp, useNavigation, useRoute } from "@react-navigation/native"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 import { style } from "./style"
 import { useRolarParaCampo } from "../../hooks/useRolarParaCampo"
 import { textoParaNumero } from "../../utils/numeros"
-import { cadastrarProduto, listarCategoriasProduto } from "../../services/produtos"
+import { atualizarProduto, buscarProduto, cadastrarProduto, listarCategoriasProduto } from "../../services/produtos"
 import type { Ingrediente, OpcaoCategoria } from "../../types/produto"
+import type { RootStackParamList } from "../../routes"
 
 import AppLayout from "../../components/AppLayout/AppLayout"
 import Button from "../../components/Button/Button"
@@ -31,6 +32,8 @@ type EstadoPopup = {
 
 export default function NovoProduto() {
     const navigation = useNavigation<NavigationProp<ParamListBase>>()
+    const route = useRoute<RouteProp<RootStackParamList, "NovoProduto">>()
+    const produtoId = route.params?.id
     const insets = useSafeAreaInsets()
     const { scrollRef, areaRef, onScroll, rolarPara } = useRolarParaCampo()
 
@@ -58,16 +61,51 @@ export default function NovoProduto() {
     useEffect(() => {
         let cancelado = false
 
-        listarCategoriasProduto().then((lista) => {
+        async function carregar() {
+            const lista = await listarCategoriasProduto()
             if (cancelado) return
+
             setCategorias(lista)
-            setCategoria((atual) => atual ?? lista[0]?.valor ?? null)
+
+            if (produtoId) {
+                const produto = await buscarProduto(produtoId)
+                if (cancelado || !produto) return
+
+                setNome(produto.nome)
+                setCategoria(produto.categoria)
+                setFoto(produto.imagem ?? null)
+                setPreco(String(produto.preco).replace(".", ","))
+                setDescricao(produto.descricao ?? "")
+                setPreparo(produto.preparo ?? "")
+                setRendimento(produto.rendimento ?? "")
+                setAtivo(produto.ativo ?? true)
+                setIngredientes(
+                    (produto.ingredientes ?? []).map((ingrediente, indice) => ({
+                        id: String(indice),
+                        nome: ingrediente.nome,
+                        quantidade: ingrediente.quantidade,
+                        unidade: ingrediente.unidade,
+                    }))
+                )
+            } else {
+                setCategoria((atual) => atual ?? lista[0]?.valor ?? null)
+            }
+        }
+
+        carregar().catch((error: unknown) => {
+            if (cancelado) return
+            setPopup({
+                visivel: true,
+                tipo: "erro",
+                titulo: "Não foi possível carregar",
+                mensagem: error instanceof Error ? error.message : "Tente novamente.",
+            })
         })
 
         return () => {
             cancelado = true
         }
-    }, [])
+    }, [produtoId])
 
     function limparErro(campo: keyof Erros) {
         setErros((e) => ({ ...e, [campo]: undefined }))
@@ -90,7 +128,7 @@ export default function NovoProduto() {
         setEnviando(true)
 
         try {
-            const resposta = await cadastrarProduto({
+            const dados = {
                 nome: nome.trim(),
                 categoria: categoria!,
                 foto,
@@ -104,20 +142,24 @@ export default function NovoProduto() {
                     unidade,
                 })),
                 ativo,
-            })
+            }
+
+            const resposta = produtoId
+                ? await atualizarProduto(produtoId, dados)
+                : await cadastrarProduto(dados)
 
             setPopup(
                 resposta.sucesso
                     ? {
                           visivel: true,
                           tipo: "sucesso",
-                          titulo: "Produto cadastrado!",
+                          titulo: produtoId ? "Produto atualizado!" : "Produto cadastrado!",
                           mensagem: resposta.mensagem,
                       }
                     : {
                           visivel: true,
                           tipo: "erro",
-                          titulo: "Não foi possível cadastrar",
+                          titulo: produtoId ? "Não foi possível atualizar" : "Não foi possível cadastrar",
                           mensagem: resposta.mensagem,
                       }
             )
@@ -125,7 +167,7 @@ export default function NovoProduto() {
             setPopup({
                 visivel: true,
                 tipo: "erro",
-                titulo: "Não foi possível cadastrar",
+                titulo: produtoId ? "Não foi possível atualizar" : "Não foi possível cadastrar",
                 mensagem: "Ocorreu um erro inesperado. Tente novamente.",
             })
         } finally {
@@ -151,7 +193,7 @@ export default function NovoProduto() {
     }
 
     return (
-        <AppLayout header={{ tipo: "detalhe", titulo: "Novo produto" }}>
+        <AppLayout header={{ tipo: "detalhe", titulo: produtoId ? "Editar produto" : "Novo produto" }}>
             <KeyboardAvoidingView style={style.flex} behavior="padding">
                 <View ref={areaRef} collapsable={false} style={style.flex}>
                     <ScrollView
@@ -275,7 +317,7 @@ export default function NovoProduto() {
 
                 <View style={[style.rodape, { paddingBottom: 16 + insets.bottom }]}>
                     <Button
-                        texto={enviando ? "Cadastrando..." : "Cadastrar produto"}
+                        texto={enviando ? (produtoId ? "Salvando..." : "Cadastrando...") : (produtoId ? "Salvar alterações" : "Cadastrar produto")}
                         disabled={enviando}
                         onPress={cadastrar}
                     />

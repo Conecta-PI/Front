@@ -11,11 +11,12 @@ import Button from "../Button/Button"
 
 type CampoFotoProps = {
     label?: string
+    tituloModal?: string
     uri: string | null
     onChange: (uri: string | null) => void
 }
 
-export default function CampoFoto({ label, uri, onChange }: CampoFotoProps) {
+export default function CampoFoto({ label, tituloModal = "Foto do produto", uri, onChange }: CampoFotoProps) {
     const [aberto, setAberto] = useState(false)
 
     async function escolher(origem: "camera" | "galeria") {
@@ -87,7 +88,7 @@ export default function CampoFoto({ label, uri, onChange }: CampoFotoProps) {
             <BottomSheet
                 visivel={aberto}
                 onFechar={() => setAberto(false)}
-                titulo="Foto do produto"
+                titulo={tituloModal}
                 descricao="Escolha como quer adicionar a foto."
             >
                 <Button texto="Tirar foto" icone="camera-outline" onPress={() => escolher("camera")} />

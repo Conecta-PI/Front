@@ -6,5 +6,6 @@ export type Perfil = {
     email: string
     cnpj: string
     chavePix: string
+    foto?: string | null
     resumo: { pedidos: number; clientes: number; produtos: number }
 }

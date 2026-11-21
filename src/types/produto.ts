@@ -5,7 +5,11 @@ export type Produto = {
     categoria: string
     descricao: string
     estoque: number
-    imagem?: string 
+    imagem?: string
+    preparo?: string
+    rendimento?: string
+    ingredientes?: Omit<Ingrediente, "id">[]
+    ativo?: boolean
 }
 
 export type OpcaoCategoria = {

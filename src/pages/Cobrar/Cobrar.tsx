@@ -1,7 +1,7 @@
 
-import React, { useCallback, useMemo, useRef, useState } from "react"
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Alert, FlatList, Text, View } from "react-native"
-import { NavigationProp, useFocusEffect, useNavigation } from "@react-navigation/native"
+import { NavigationProp, RouteProp, useFocusEffect, useNavigation, useRoute } from "@react-navigation/native"
 
 import { style } from "./style"
 import AppLayout from "../../components/AppLayout/AppLayout"
@@ -22,12 +22,13 @@ import PagamentoDinheiro from "../PagamentoDinheiro/PagamentoDinheiro"
 import PagamentoPix from "../PagamentoPix/PagamentoPix"
 import AgendarPagamento from "../AgendarPagamento/AgendarPagamento"
 import AgendamentoConfirmado from "../AgendamentoConfirmado/AgendamentoConfirmado"
-import type { AppParamList } from "../../routes"
+import type { AppParamList, RootTabParamList } from "../../routes"
 import VendaConfirmada from "../VendaConfirmada/VendaConfirmada"
 
 export default function Cobrar() {
     const { setCobranca } = useNavBar()
     const navigation = useNavigation<NavigationProp<AppParamList>>()
+    const route = useRoute<RouteProp<RootTabParamList, "Cobrar">>()
 
     const [busca, setBusca] = useState("")
     const [quantidades, setQuantidades] = useState<Record<string, number>>({})
@@ -38,6 +39,7 @@ export default function Cobrar() {
     const [carregando, setCarregando] = useState(true)
     const [erro, setErro] = useState<string | null>(null)
     const [vendaCriada, setVendaCriada] = useState<VendaResponse | null>(null)
+    const produtoAdicionado = useRef<string | null>(null)
 
     // Impede duas requisições simultâneas de venda.
     const enviandoVenda = useRef(false)
@@ -57,6 +59,22 @@ export default function Cobrar() {
         () => filtrarProdutos(todosProdutos, busca, "Todos"),
         [todosProdutos, busca]
     )
+
+    useEffect(() => {
+        const produtoId = route.params?.produtoId
+        if (!produtoId || todosProdutos.length === 0 || produtoAdicionado.current === produtoId) {
+            return
+        }
+
+        const produto = todosProdutos.find((item) => item.id === produtoId)
+        if (produto) {
+            setQuantidades((atual) => ({
+                ...atual,
+                [produtoId]: (atual[produtoId] ?? 0) + 1,
+            }))
+            produtoAdicionado.current = produtoId
+        }
+    }, [route.params?.produtoId, todosProdutos])
 
     const { itens, total } = useMemo(() => {
         let itens = 0

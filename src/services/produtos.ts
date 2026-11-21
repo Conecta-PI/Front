@@ -1,4 +1,4 @@
-import { apiGet, apiPost, ApiError, resolverUrlImagem } from "./api"
+import { apiDelete, apiGet, apiPatch, apiPost, ApiError, resolverUrlImagem } from "./api"
 
 import type {
     NovoProduto,
@@ -97,6 +97,42 @@ function lerComoDataUrl(uri: string): Promise<string> {
                     leitor.readAsDataURL(blob)
                 })
         )
+}
+
+export async function atualizarProduto(id: string, dados: NovoProduto): Promise<RespostaCadastro> {
+    try {
+        const foto = dados.foto
+            ? (dados.foto.startsWith("data:")
+                ? dados.foto
+                : !dados.foto.startsWith("http")
+                    ? await lerComoDataUrl(dados.foto)
+                    : undefined)
+            : null
+
+        await apiPatch(`/produtos/${encodeURIComponent(id)}`, {
+            nome: dados.nome,
+            categoria: dados.categoria,
+            preco: dados.preco,
+            descricao: dados.descricao,
+            preparo: dados.preparo,
+            rendimento: dados.rendimento,
+            ingredientes: dados.ingredientes,
+            ativo: dados.ativo,
+            estoque: 0,
+            foto,
+        })
+
+        return { sucesso: true, mensagem: "As alterações foram salvas." }
+    } catch (error) {
+        return {
+            sucesso: false,
+            mensagem: error instanceof Error ? error.message : "Tente novamente.",
+        }
+    }
+}
+
+export async function excluirProduto(id: string): Promise<void> {
+    await apiDelete(`/produtos/${encodeURIComponent(id)}`)
 }
 
 export async function cadastrarProduto(dados: NovoProduto): Promise<RespostaCadastro> {
