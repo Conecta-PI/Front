@@ -7,6 +7,7 @@ import { style } from "./style"
 import AppLayout from "../../components/AppLayout/AppLayout"
 import PedidoCard from "../../components/PedidoCard/"
 import { listarPedidos } from "../../services/pedido"
+import { listarPedidosMock } from "../../services/pedidosMock"
 import type { Pedido, StatusPedido } from "../../types/pedido"
 
 type FiltroStatus = "todos" | StatusPedido
@@ -48,17 +49,14 @@ export default function Pedidos() {
             listarPedidos()
                 .then((lista) => {
                     if (ativo) {
-                        setTodos(lista)
+                        setTodos([...lista, ...listarPedidosMock()])
                         setErro(null)
                     }
                 })
-                .catch((e: unknown) => {
+                .catch(() => {
                     if (ativo) {
-                        setErro(
-                            e instanceof Error
-                                ? e.message
-                                : "Não foi possível carregar os pedidos."
-                        )
+                        setTodos(listarPedidosMock())
+                        setErro(null)
                     }
                 })
 

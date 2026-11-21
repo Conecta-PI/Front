@@ -88,7 +88,14 @@ export default function Cadastro() {
         if (!form.nome.trim()) novos.nome = "Informe seu nome completo"
         if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) novos.email = "Informe um e-mail válido"
         if (form.telefone.replace(/\D/g, "").length < 10) novos.telefone = "Informe um telefone válido"
-        if (form.senha.length < 8) novos.senha = "A senha deve ter no mínimo 8 caracteres"
+        if (
+            form.senha.length < 8 ||
+            !/[a-z]/.test(form.senha) ||
+            !/[A-Z]/.test(form.senha) ||
+            !/[0-9]/.test(form.senha)
+        ) {
+            novos.senha = "Use 8+ caracteres com letras maiúsculas, minúsculas e números"
+        }
         if (form.confirmar !== form.senha) novos.confirmar = "As senhas não coincidem"
         if (!form.negocio.trim()) novos.negocio = "Informe o nome do seu negócio"
         if (!aceito) novos.termos = "Aceite os termos de uso para continuar"
@@ -119,7 +126,12 @@ export default function Cadastro() {
     }
 
     function abrirTermos() {
-        
+        navigation.navigate("TermosUso", {
+            onAceitar: () => {
+                setAceito(true)
+                setErros((e) => ({ ...e, termos: undefined }))
+            },
+        })
     }
 
     function jaTenhoConta() {
@@ -183,7 +195,7 @@ export default function Cadastro() {
                         <Campo
                             tipo="senha"
                             label="Senha"
-                            placeholder="Mínimo de 8 caracteres"
+                            placeholder="Maiúsculas, minúsculas e números"
                             value={form.senha}
                             onChangeText={(t) => alterar("senha", t)}
                             erro={erros.senha}
@@ -214,8 +226,12 @@ export default function Cadastro() {
                             <Checkbox
                                 marcado={aceito}
                                 onChange={(v) => {
-                                    setAceito(v)
-                                    setErros((e) => ({ ...e, termos: undefined }))
+                                    if (!v) {
+                                        setAceito(false)
+                                        setErros((e) => ({ ...e, termos: undefined }))
+                                        return
+                                    }
+                                    abrirTermos()
                                 }}
                                 erro={!!erros.termos}
                             >

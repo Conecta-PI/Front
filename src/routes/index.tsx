@@ -1,5 +1,5 @@
 import React from "react"
-import { DefaultTheme, NavigationContainer } from "@react-navigation/native"
+import { DefaultTheme, NavigationContainer, NavigatorScreenParams } from "@react-navigation/native"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
 
@@ -33,6 +33,8 @@ import FichaTecnica from "../pages/FichaTecnica/FichaTecnica"
 import Relatorios from "../pages/Relatorios/Relatorios"
 import Configuracoes from "../pages/Configuracoes/Configuracoes"
 import NovaEncomenda from "../pages/NovaEncomenda/NovaEncomenda"
+import EditarPerfil from "../pages/EditarPerfil/EditarPerfil"
+import TermosUso from "../pages/TermosUso/TermosUso"
 
 import { NavBarProvider, useNavBar } from "../contexts/NavBarContext"
 
@@ -45,12 +47,12 @@ export type RootStackParamList = {
     CodigoSeguranca: { email: string; mensagem?: string }
     NovaSenha: { email: string; codigo: string }
     RecuperacaoSucesso: undefined
-    Main: undefined
+    Main: NavigatorScreenParams<RootTabParamList> | undefined
     Estoque: undefined
     Encomendas: undefined
     Clientes: undefined
     DetalheCliente: { id: string }
-    NovoProduto: undefined
+    NovoProduto: { id?: string } | undefined
     DetalheEncomenda: { id: string }
     DetalheProduto: { id: string }
     Financeiro: undefined
@@ -60,12 +62,14 @@ export type RootStackParamList = {
     Relatorios: undefined
     Configuracoes: undefined
     NovaEncomenda: { clienteId: string; clienteNome: string }
+    TermosUso: { onAceitar: () => void }
+    EditarPerfil: undefined
 }
 
 export type RootTabParamList = {
     Inicio: undefined
     Produtos: undefined
-    Cobrar: undefined
+    Cobrar: { produtoId?: string } | undefined
     Pedidos: undefined
     Mais: undefined
 }
@@ -134,6 +138,8 @@ export default function Routes() {
                     <Stack.Screen name="Relatorios" component={Relatorios} />
                     <Stack.Screen name="Configuracoes" component={Configuracoes} />
                     <Stack.Screen name="NovaEncomenda" component={NovaEncomenda} />
+                    <Stack.Screen name="TermosUso" component={TermosUso} />
+                    <Stack.Screen name="EditarPerfil" component={EditarPerfil} />
                 </Stack.Navigator>
             </NavigationContainer>
         </NavBarProvider>

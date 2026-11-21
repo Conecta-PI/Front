@@ -53,15 +53,22 @@ const CONFIG: Record<TipoAlerta, Config> = {
 type AlertaAtencaoProps = {
     tipo: TipoAlerta
     quantidade: number
+    encomendaHojeId?: string
 }
 
-export default function AlertaAtencao({ tipo, quantidade }: AlertaAtencaoProps) {
+export default function AlertaAtencao({ tipo, quantidade, encomendaHojeId }: AlertaAtencaoProps) {
     const navigation = useNavigation<NavigationProp<AppParamList>>()
     const config = CONFIG[tipo]
 
     return (
         <Pressable
-            onPress={() => navigation.dispatch(CommonActions.navigate(config.destino))}
+            onPress={() => {
+                if (tipo === "informativo" && encomendaHojeId) {
+                    navigation.navigate("DetalheEncomenda", { id: encomendaHojeId })
+                    return
+                }
+                navigation.dispatch(CommonActions.navigate(config.destino))
+            }}
             accessibilityRole="button"
             style={({ pressed }) => [style.container, pressed && style.pressionado]}
         >

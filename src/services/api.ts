@@ -66,11 +66,22 @@ async function requisitar<T>(
             if (body && typeof body === "object") {
                 const detail = "detail" in body && typeof body.detail === "string" ? body.detail : null
                 const title = "title" in body && typeof body.title === "string" ? body.title : null
-                message = detail ?? title ?? message
+                const bodyMessage = "message" in body && typeof body.message === "string" ? body.message : null
+                message = detail ?? title ?? bodyMessage ?? message
             }
         } catch {
             // Keep the HTTP status message when the response has no JSON body.
         }
+        if (response.status === 401) {
+            await limparToken()
+            throw new ApiError(
+                message === "A API respondeu com erro (401)."
+                    ? "Sua sessão expirou ou o acesso não foi autorizado. Entre novamente."
+                    : message,
+                response.status
+            )
+        }
+
         throw new ApiError(message, response.status)
     }
 

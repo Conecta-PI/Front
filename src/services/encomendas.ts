@@ -21,6 +21,9 @@ export type Encomenda = {
     dataEntrega?: string | null
     valorTotal: number
     observacao?: string | null
+    horario?: string | null
+    tipoEntrega?: "retirada" | "entrega"
+    sinalPago?: number
     itens: EncomendaItem[]
 }
 

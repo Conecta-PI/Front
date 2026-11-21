@@ -1,24 +1,26 @@
 import React, { useEffect, useState } from "react"
-import { Image, ScrollView, Text, View } from "react-native"
+import { Alert, Image, ScrollView, Text, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
-import { RouteProp, useRoute } from "@react-navigation/native"
+import { NavigationProp, RouteProp, useNavigation, useRoute } from "@react-navigation/native"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 import { style } from "./style"
 import { themes } from "../../global/themes"
 import AppLayout from "../../components/AppLayout/AppLayout"
 import Button from "../../components/Button/Button"
-import { buscarProduto } from "../../services/produtos"
+import { buscarProduto, excluirProduto } from "../../services/produtos"
 import { formatarMoeda } from "../../utils/formataMoeda"
-import type { RootStackParamList } from "../../routes"
+import type { AppParamList, RootStackParamList } from "../../routes"
 
 export default function DetalheProduto() {
     const { params } = useRoute<RouteProp<RootStackParamList, "DetalheProduto">>()
+    const navigation = useNavigation<NavigationProp<AppParamList>>()
     const insets = useSafeAreaInsets()
 
     const [produto, setProduto] = useState<Awaited<ReturnType<typeof buscarProduto>>>(null)
     const [carregando, setCarregando] = useState(true)
     const [erro, setErro] = useState<string | null>(null)
+    const [excluindo, setExcluindo] = useState(false)
 
     useEffect(() => {
         let ativo = true
@@ -42,6 +44,30 @@ export default function DetalheProduto() {
             ativo = false
         }
     }, [params.id])
+
+    function confirmarExclusao() {
+        Alert.alert(
+            "Excluir produto",
+            "Tem certeza que deseja excluir este produto?",
+            [
+                { text: "Cancelar", style: "cancel" },
+                {
+                    text: "Excluir",
+                    style: "destructive",
+                    onPress: async () => {
+                        setExcluindo(true)
+                        try {
+                            await excluirProduto(params.id)
+                            navigation.navigate("Produtos")
+                        } catch (error) {
+                            Alert.alert("Erro", error instanceof Error ? error.message : "Não foi possível excluir o produto.")
+                            setExcluindo(false)
+                        }
+                    },
+                },
+            ]
+        )
+    }
 
     return (
         <AppLayout header={{ tipo: "detalhe", titulo: produto?.nome ?? "Produto" }}>
@@ -71,11 +97,31 @@ export default function DetalheProduto() {
                     </View>
 
                     <Button
+                        texto="Editar produto"
+                        icone="create-outline"
+                        onPress={() => navigation.navigate("NovoProduto", { id: params.id })}
+                    />
+
+                    <Button
                         texto="Adicionar ao pedido"
                         icone="cart-outline"
+                        variante="contorno"
                         onPress={() => {
-                            // TODO: adicionar ao pedido
+                            navigation.navigate("Main", {
+                                screen: "Cobrar",
+                                params: { produtoId: params.id },
+                            })
+                            Alert.alert("Produto adicionado", `${produto.nome} foi incluído no pedido.`)
                         }}
+                    />
+
+                    <Button
+                        texto={excluindo ? "Excluindo..." : "Excluir produto"}
+                        icone="trash-outline"
+                        cor="erro"
+                        variante="contorno"
+                        disabled={excluindo}
+                        onPress={confirmarExclusao}
                     />
                 </ScrollView>
             )}

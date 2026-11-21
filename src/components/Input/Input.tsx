@@ -16,6 +16,7 @@ export type InputTipo =
     | "decimal"
     | "data"
     | "hora"
+    | "cnpj"
 
 export type InputProps = Omit<TextInputProps, "secureTextEntry" | "keyboardType"> & {
     tipo: InputTipo
@@ -57,6 +58,16 @@ function mascaraData(valor: string) {
     return `${d.slice(0, 2)}/${d.slice(2, 4)}/${d.slice(4)}`
 }
 
+function mascaraCnpj(valor: string) {
+    const d = valor.replace(/\D/g, "").slice(0, 14)
+
+    if (d.length <= 2) return d
+    if (d.length <= 5) return `${d.slice(0, 2)}.${d.slice(2)}`
+    if (d.length <= 8) return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5)}`
+    if (d.length <= 12) return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5, 8)}/${d.slice(8)}`
+    return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5, 8)}/${d.slice(8, 12)}-${d.slice(12)}`
+}
+
 function mascaraHora(valor: string) {
     const d = valor.replace(/\D/g, "").slice(0, 4)
 
@@ -69,6 +80,7 @@ const MASCARAS: Partial<Record<InputTipo, (valor: string) => string>> = {
     decimal: mascaraDecimal,
     data: mascaraData,
     hora: mascaraHora,
+    cnpj: mascaraCnpj,
 }
 
 function propsPorTipo(tipo: InputTipo, senhaVisivel: boolean): TextInputProps {
@@ -110,6 +122,9 @@ function propsPorTipo(tipo: InputTipo, senhaVisivel: boolean): TextInputProps {
 
         case "hora":
             return { keyboardType: "number-pad", maxLength: 5 }
+
+        case "cnpj":
+            return { keyboardType: "number-pad", maxLength: 18, autoComplete: "off" }
 
         case "texto":
         default:
