@@ -192,7 +192,10 @@ export default function NovoProduto() {
                 })
             } else {
                 navigation.navigate("Main", {
-                    screen: "Inicio",
+                    screen: "Produtos",
+                    params: {
+                        mostrarInativos: false,
+                    },
                 })
             }
         }

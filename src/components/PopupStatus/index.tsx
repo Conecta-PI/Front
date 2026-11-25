@@ -72,7 +72,6 @@ export default function PopupStatus({
     fundoConfirmar,
 }: PopupStatusProps) {
     const config = CONFIG[tipo]
-    console.log("[TESTE POPUPSTATUS]", { visivel, tipo, titulo })
 
     return (
         <Modal
