@@ -72,4 +72,18 @@ export const style = StyleSheet.create({
     total: {
         ...themes.typography.titulo3,
     },
+    acoesTopo: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 10,
+    },
+
+    botaoExcluir: {
+        width: 34,
+        height: 34,
+        borderRadius: 10,
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: themes.colors["fundo-de-erro"],
+    },
 })

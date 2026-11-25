@@ -1,11 +1,15 @@
+
 import { StyleSheet } from "react-native"
 import { themes } from "../../global/themes"
 
 export const style = StyleSheet.create({
+    scroll: {
+        flex: 1,
+    },
     conteudo: {
         alignItems: "center",
         padding: 16,
-        paddingBottom: 24,
+        paddingBottom: 32,
         gap: 8,
     },
     icone: {
@@ -81,6 +85,6 @@ export const style = StyleSheet.create({
     acoes: {
         alignSelf: "stretch",
         gap: 8,
-        marginTop: "auto",
+        marginTop: 8,
     },
 })

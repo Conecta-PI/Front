@@ -1,5 +1,7 @@
+
 import React from "react"
 import { Pressable, Text, View } from "react-native"
+import { Ionicons } from "@expo/vector-icons"
 
 import { style } from "./style"
 import { themes } from "../../global/themes"
@@ -22,6 +24,12 @@ const CONFIG: Record<
         fundo: themes.colors["campo-desabilitado"],
         corTotal: themes.colors["texto"],
     },
+    cancelado: {
+        texto: "Cancelado",
+        cor: themes.colors["erro"],
+        fundo: themes.colors["fundo-de-erro"],
+        corTotal: themes.colors["texto-secundario"],
+    },
 }
 
 type PedidoCardProps = {
@@ -32,6 +40,8 @@ type PedidoCardProps = {
     itens: ItemPedido[]
     total: number
     onPress?: () => void
+    onCancelar?: () => void
+    onEditar?: () => void
 }
 
 export default function PedidoCard({
@@ -42,10 +52,14 @@ export default function PedidoCard({
     itens,
     total,
     onPress,
+    onCancelar,
+    onEditar,
 }: PedidoCardProps) {
     const config = CONFIG[status]
 
     const resumo = itens.map((i) => `${i.quantidade}x ${i.nome}`).join(" • ")
+    const podeCancelar = status !== "cancelado" && Boolean(onCancelar)
+    const podeEditar = status === "pendente" && Boolean(onEditar)
 
     return (
         <Pressable
@@ -61,10 +75,50 @@ export default function PedidoCard({
                     <Text style={style.data}>• {data}</Text>
                 </View>
 
-                <View style={[style.status, { backgroundColor: config.fundo }]}>
-                    <Text style={[style.statusTexto, { color: config.cor }]}>
-                        {config.texto}
-                    </Text>
+                <View style={style.acoesTopo}>
+                    <View style={[style.status, { backgroundColor: config.fundo }]}>
+                        <Text style={[style.statusTexto, { color: config.cor }]}>
+                            {config.texto}
+                        </Text>
+                    </View>
+
+                    {podeEditar && (
+                        <Pressable
+                            onPress={(event) => {
+                                event.stopPropagation()
+                                onEditar?.()
+                            }}
+                            accessibilityRole="button"
+                            accessibilityLabel={`Editar pedido ${id}`}
+                            hitSlop={10}
+                            style={style.botaoExcluir}
+                        >
+                            <Ionicons
+                                name="create-outline"
+                                size={20}
+                                color={themes.colors["dourado"]}
+                            />
+                        </Pressable>
+                    )}
+
+                    {podeCancelar && (
+                        <Pressable
+                            onPress={(event) => {
+                                event.stopPropagation()
+                                onCancelar?.()
+                            }}
+                            accessibilityRole="button"
+                            accessibilityLabel={`Cancelar pedido ${id}`}
+                            hitSlop={10}
+                            style={style.botaoExcluir}
+                        >
+                            <Ionicons
+                                name="trash-outline"
+                                size={19}
+                                color={themes.colors["erro"]}
+                            />
+                        </Pressable>
+                    )}
                 </View>
             </View>
 
@@ -72,13 +126,17 @@ export default function PedidoCard({
                 <Text style={style.cliente} numberOfLines={1}>
                     {cliente}
                 </Text>
+
                 <Text style={style.itens} numberOfLines={2}>
                     {resumo}
                 </Text>
             </View>
 
             <View style={style.rodape}>
-                <Text style={style.rotuloTotal}>Total cobrado</Text>
+                <Text style={style.rotuloTotal}>
+                    {status === "cancelado" ? "Total cancelado" : "Total cobrado"}
+                </Text>
+
                 <Text style={[style.total, { color: config.corTotal }]}>
                     {formatarMoeda(total)}
                 </Text>
@@ -86,3 +144,4 @@ export default function PedidoCard({
         </Pressable>
     )
 }
+

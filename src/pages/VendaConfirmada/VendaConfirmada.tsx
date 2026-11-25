@@ -10,7 +10,7 @@ import { style } from "./style"
 
 type VendaConfirmadaProps = {
     total: number
-    pagamento: Exclude<TipoPagamento, "agendar">
+    pagamento: TipoPagamento
     clienteNome: string
     vendaId: number | string
     onVoltar: () => void
@@ -18,10 +18,11 @@ type VendaConfirmadaProps = {
     onNovaVenda: () => void
 }
 
-const LABEL_PAGAMENTO: Record<Exclude<TipoPagamento, "agendar">, string> = {
-    pix: "PIX",
+const LABEL_PAGAMENTO: Record<TipoPagamento, string> = {
     cartao: "Cartão",
     dinheiro: "Dinheiro",
+    pix: "PIX (simulado)",
+    agendar: "Agendamento",
 }
 
 export default function VendaConfirmada({
@@ -58,6 +59,7 @@ export default function VendaConfirmada({
                 </View>
 
                 <Text style={style.titulo}>Pagamento confirmado!</Text>
+
                 <Text style={style.subtitulo}>
                     Pago com {LABEL_PAGAMENTO[pagamento]}
                 </Text>

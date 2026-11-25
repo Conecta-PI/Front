@@ -11,6 +11,7 @@ export default function NavBarCobranca({
     itens,
     total,
     desabilitado,
+    textoBotao,
     onCobrar,
 }: RodapeCobranca) {
     const insets = useSafeAreaInsets()
@@ -28,7 +29,7 @@ export default function NavBarCobranca({
             </View>
 
             <Button
-                texto={`Cobrar ${formatarMoeda(total)}`}
+                texto={textoBotao ?? `Cobrar ${formatarMoeda(total)}`}
                 disabled={desabilitado}
                 onPress={onCobrar}
             />

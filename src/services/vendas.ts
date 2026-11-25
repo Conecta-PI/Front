@@ -1,5 +1,5 @@
 
-import { apiPost } from "./api"
+import { apiPost, apiDelete } from "./api"
 
 export type FormaPagamentoVenda = "pix" | "dinheiro" | "cartao"
 
@@ -31,4 +31,8 @@ export async function criarVenda(
     dados: VendaRequest
 ): Promise<VendaResponse> {
     return apiPost<VendaResponse>("/vendas", dados)
+}
+
+export async function cancelarVenda(id: number): Promise<void> {
+    return apiDelete<void>(`/vendas/${id}`)
 }

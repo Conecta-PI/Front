@@ -25,7 +25,11 @@ type FormaPagamentoProps = {
     onPress: () => void
 }
 
-export default function FormaPagamento({ tipo, selecionado, onPress }: FormaPagamentoProps) {
+export default function FormaPagamento({
+    tipo,
+    selecionado,
+    onPress,
+}: FormaPagamentoProps) {
     const config = CONFIG[tipo]
 
     return (
@@ -37,7 +41,11 @@ export default function FormaPagamento({ tipo, selecionado, onPress }: FormaPaga
             style={[style.card, selecionado && style.cardSelecionado]}
         >
             <View style={style.icone}>
-                <Ionicons name={config.icone} size={18} color={themes.colors["azul-escuro"]} />
+                <Ionicons
+                    name={config.icone}
+                    size={18}
+                    color={themes.colors["azul-escuro"]}
+                />
             </View>
 
             <Text style={[style.texto, selecionado && style.textoSelecionado]}>
@@ -46,7 +54,11 @@ export default function FormaPagamento({ tipo, selecionado, onPress }: FormaPaga
 
             {selecionado && (
                 <View style={style.check}>
-                    <Ionicons name="checkmark" size={12} color={themes.colors["branco"]} />
+                    <Ionicons
+                        name="checkmark"
+                        size={12}
+                        color={themes.colors["branco"]}
+                    />
                 </View>
             )}
         </Pressable>

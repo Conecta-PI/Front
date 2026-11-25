@@ -1,4 +1,5 @@
-export type StatusPedido = "pago" | "pendente"
+
+export type StatusPedido = "pago" | "pendente" | "cancelado"
 
 export type ItemPedido = {
     quantidade: number
@@ -6,8 +7,9 @@ export type ItemPedido = {
 }
 
 export type Pedido = {
-    id: string     
-    data: string   
+    id: string
+    vendaId: number
+    data: string
     status: StatusPedido
     cliente: string
     itens: ItemPedido[]

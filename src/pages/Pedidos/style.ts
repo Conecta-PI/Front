@@ -4,11 +4,13 @@ import { themes } from "../../global/themes"
 export const style = StyleSheet.create({
     filtros: {
         flexDirection: "row",
+        alignItems: "center",
         gap: 8,
         paddingHorizontal: 16,
         paddingVertical: 12,
     },
     chip: {
+        flexShrink: 0,
         paddingVertical: 8,
         paddingHorizontal: 16,
         borderRadius: 999,
@@ -25,6 +27,9 @@ export const style = StyleSheet.create({
 
     chipPagos: { backgroundColor: themes.colors["fundo-de-sucesso"] },
     chipTextoPagos: { color: themes.colors["sucesso"] },
+
+    chipCancelados: { backgroundColor: themes.colors["fundo-de-erro"] },
+    chipTextoCancelados: { color: themes.colors["erro"] },
 
     chipAtivo: { backgroundColor: themes.colors["azul-escuro"] },
     chipTextoAtivo: {
