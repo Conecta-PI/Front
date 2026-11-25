@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react"
 import { KeyboardAvoidingView, ScrollView, Text, View } from "react-native"
 import { NavigationProp, ParamListBase, RouteProp, useNavigation, useRoute } from "@react-navigation/native"
@@ -41,6 +42,7 @@ export default function NovoProduto() {
     const [categoria, setCategoria] = useState<string | null>(null)
     const [foto, setFoto] = useState<string | null>(null)
     const [preco, setPreco] = useState("")
+    const [estoque, setEstoque] = useState("0")
     const [descricao, setDescricao] = useState("")
     const [preparo, setPreparo] = useState("")
     const [rendimento, setRendimento] = useState("")
@@ -75,6 +77,7 @@ export default function NovoProduto() {
                 setCategoria(produto.categoria)
                 setFoto(produto.imagem ?? null)
                 setPreco(String(produto.preco).replace(".", ","))
+                setEstoque(String(produto.estoque ?? 0))
                 setDescricao(produto.descricao ?? "")
                 setPreparo(produto.preparo ?? "")
                 setRendimento(produto.rendimento ?? "")
@@ -133,6 +136,7 @@ export default function NovoProduto() {
                 categoria: categoria!,
                 foto,
                 preco: textoParaNumero(preco),
+                estoque: Number(estoque || 0),
                 descricao: descricao.trim(),
                 preparo: preparo.trim(),
                 rendimento: rendimento.trim(),
@@ -151,17 +155,17 @@ export default function NovoProduto() {
             setPopup(
                 resposta.sucesso
                     ? {
-                          visivel: true,
-                          tipo: "sucesso",
-                          titulo: produtoId ? "Produto atualizado!" : "Produto cadastrado!",
-                          mensagem: resposta.mensagem,
-                      }
+                        visivel: true,
+                        tipo: "sucesso",
+                        titulo: produtoId ? "Produto atualizado!" : "Produto cadastrado!",
+                        mensagem: resposta.mensagem,
+                    }
                     : {
-                          visivel: true,
-                          tipo: "erro",
-                          titulo: produtoId ? "Não foi possível atualizar" : "Não foi possível cadastrar",
-                          mensagem: resposta.mensagem,
-                      }
+                        visivel: true,
+                        tipo: "erro",
+                        titulo: produtoId ? "Não foi possível atualizar" : "Não foi possível cadastrar",
+                        mensagem: resposta.mensagem,
+                    }
             )
         } catch {
             setPopup({
@@ -179,7 +183,18 @@ export default function NovoProduto() {
         setPopup((p) => ({ ...p, visivel: false }))
 
         if (popup.tipo === "sucesso") {
-            navigation.navigate("Main", { screen: "Inicio" })
+            if (produtoId) {
+                navigation.navigate("Main", {
+                    screen: "Produtos",
+                    params: {
+                        mostrarInativos: !ativo,
+                    },
+                })
+            } else {
+                navigation.navigate("Main", {
+                    screen: "Inicio",
+                })
+            }
         }
     }
 
@@ -234,7 +249,12 @@ export default function NovoProduto() {
                             {!!erros.categoria && <Text style={style.erro}>{erros.categoria}</Text>}
                         </View>
 
-                        <CampoFoto label="Foto do produto" uri={foto} onChange={setFoto} />
+                        <CampoFoto
+                            label="Foto do produto"
+                            uri={foto}
+                            onChange={setFoto}
+                            retornarDataUrl
+                        />
 
                         <CampoRolavel
                             tipo="moeda"
@@ -246,6 +266,15 @@ export default function NovoProduto() {
                                 limparErro("preco")
                             }}
                             erro={erros.preco}
+                            aoFocar={rolarPara}
+                        />
+
+                        <CampoRolavel
+                            tipo="numero"
+                            label="Quantidade em estoque"
+                            placeholder="Ex.: 20"
+                            value={estoque}
+                            onChangeText={setEstoque}
                             aoFocar={rolarPara}
                         />
 

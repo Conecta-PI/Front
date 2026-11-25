@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from "react"
-import { ActivityIndicator, Alert, FlatList, Pressable, Text, View } from "react-native"
+import { ActivityIndicator, FlatList, Pressable, Text, View } from "react-native"
+import PopupStatus, { type TipoPopup } from "../../components/PopupStatus/"
 import { useFocusEffect } from "@react-navigation/native"
 
 import AppLayout from "../../components/AppLayout/AppLayout"
@@ -32,6 +33,12 @@ export default function ListaCompras() {
     const [dados, setDados] = useState<ListaCompra[]>([])
     const [carregando, setCarregando] = useState(true)
     const [erro, setErro] = useState<string | null>(null)
+    const [popupVisivel, setPopupVisivel] = useState(false)
+    const [popupTipo, setPopupTipo] = useState<TipoPopup>("erro")
+    const [popupTitulo, setPopupTitulo] = useState("")
+    const [popupMensagem, setPopupMensagem] = useState("")
+    const [itemExclusao, setItemExclusao] = useState<ListaCompra | null>(null)
+    const [excluindo, setExcluindo] = useState(false)
     const [sheetVisivel, setSheetVisivel] = useState(false)
     const [editandoId, setEditandoId] = useState<number | null>(null)
     const [titulo, setTitulo] = useState("")
@@ -156,27 +163,36 @@ export default function ListaCompras() {
     }
 
     function confirmarExclusao(item: ListaCompra) {
-        Alert.alert(
-            "Excluir lista",
-            `Deseja excluir "${item.titulo}"?`,
-            [
-                { text: "Cancelar", style: "cancel" },
-                {
-                    text: "Excluir",
-                    style: "destructive",
-                    onPress: async () => {
-                        try {
-                            await excluirListaCompra(item.id)
-                            carregar()
-                        } catch (error) {
-                            Alert.alert("Erro", error instanceof Error ? error.message : "Não foi possível excluir a lista.")
-                        }
-                    },
-                },
-            ]
-        )
+        setItemExclusao(item)
+        setPopupTipo("confirmacao")
+        setPopupTitulo("Excluir lista")
+        setPopupMensagem(`Deseja excluir "${item.titulo}"?`)
+        setPopupVisivel(true)
     }
 
+    async function executarExclusao() {
+        if (!itemExclusao || excluindo) return
+
+        setExcluindo(true)
+
+        try {
+            await excluirListaCompra(itemExclusao.id)
+
+            setPopupVisivel(false)
+            setItemExclusao(null)
+            carregar()
+        } catch (error) {
+            setPopupTipo("erro")
+            setPopupTitulo("Erro")
+            setPopupMensagem(
+                error instanceof Error
+                    ? error.message
+                    : "Não foi possível excluir a lista."
+            )
+        } finally {
+            setExcluindo(false)
+        }
+    }
     return (
         <AppLayout header={{ tipo: "detalhe", titulo: "Lista de compras" }}>
             <View style={{ flex: 1, paddingHorizontal: 16, paddingTop: 12 }}>
@@ -270,6 +286,22 @@ export default function ListaCompras() {
                     onPress={salvar}
                 />
             </BottomSheet>
+            <PopupStatus
+                visivel={popupVisivel}
+                tipo={popupTipo}
+                titulo={popupTitulo}
+                mensagem={popupMensagem}
+                textoConfirmar="Excluir"
+                textoCarregando="Excluindo..."
+                carregando={excluindo}
+                onFechar={() => {
+                    if (!excluindo) {
+                        setPopupVisivel(false)
+                        setItemExclusao(null)
+                    }
+                }}
+                onConfirmar={executarExclusao}
+            />
         </AppLayout>
     )
 }

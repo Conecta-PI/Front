@@ -1,3 +1,4 @@
+
 import { apiDelete, apiGet, apiPatch, apiPost, ApiError, resolverUrlImagem } from "./api"
 
 import type {
@@ -17,6 +18,7 @@ type ProdutoApi = {
     descricao: string
     estoque: number
     foto?: string | null
+    ativo?: boolean
 }
 
 function mapearProduto(produto: ProdutoApi): Produto {
@@ -29,6 +31,11 @@ function mapearProduto(produto: ProdutoApi): Produto {
 
 export async function listarProdutos(): Promise<Produto[]> {
     const produtos = await apiGet<ProdutoApi[]>("/produtos")
+    return produtos.map(mapearProduto)
+}
+
+export async function listarProdutosInativos(): Promise<Produto[]> {
+    const produtos = await apiGet<ProdutoApi[]>("/produtos/inativos")
     return produtos.map(mapearProduto)
 }
 
@@ -113,12 +120,12 @@ export async function atualizarProduto(id: string, dados: NovoProduto): Promise<
             nome: dados.nome,
             categoria: dados.categoria,
             preco: dados.preco,
+            estoque: dados.estoque,
             descricao: dados.descricao,
             preparo: dados.preparo,
             rendimento: dados.rendimento,
             ingredientes: dados.ingredientes,
             ativo: dados.ativo,
-            estoque: 0,
             foto,
         })
 
@@ -135,20 +142,28 @@ export async function excluirProduto(id: string): Promise<void> {
     await apiDelete(`/produtos/${encodeURIComponent(id)}`)
 }
 
+export async function reativarProduto(id: string): Promise<void> {
+    await apiPatch(`/produtos/${encodeURIComponent(id)}/reativar`, {})
+}
+
 export async function cadastrarProduto(dados: NovoProduto): Promise<RespostaCadastro> {
     try {
-        const foto = dados.foto ? await lerComoDataUrl(dados.foto) : null
+        const foto = dados.foto
+            ? dados.foto.startsWith("data:")
+                ? dados.foto
+                : await lerComoDataUrl(dados.foto)
+            : null
 
         await apiPost("/produtos", {
             nome: dados.nome,
             categoria: dados.categoria,
             preco: dados.preco,
+            estoque: dados.estoque,
             descricao: dados.descricao,
             preparo: dados.preparo,
             rendimento: dados.rendimento,
             ingredientes: dados.ingredientes,
             ativo: dados.ativo,
-            estoque: 0,
             foto,
         })
 

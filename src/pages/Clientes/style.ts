@@ -20,7 +20,13 @@ export const style = StyleSheet.create({
         color: themes.colors["texto"],
         paddingVertical: 0,
     },
-    filtros: { flexDirection: "row", gap: 8, paddingVertical: 8 },
+    filtros: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
+        paddingVertical: 8,
+        paddingRight: 16,
+    },
     filtro: {
         paddingVertical: 7,
         paddingHorizontal: 13,

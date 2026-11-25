@@ -1,5 +1,5 @@
 
-import React, { useCallback, useMemo, useState } from "react"
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
     ActivityIndicator,
     Alert,
@@ -12,7 +12,12 @@ import {
     View
 } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
-import { useFocusEffect, useNavigation } from "@react-navigation/native"
+import {
+    useFocusEffect,
+    useNavigation,
+    useRoute,
+} from "@react-navigation/native"
+import type { RouteProp } from "@react-navigation/native"
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
 
 import { style } from "./style"
@@ -76,10 +81,13 @@ export default function Clientes() {
     const navigation =
         useNavigation<NativeStackNavigationProp<RootStackParamList>>()
 
+    const route = useRoute<RouteProp<RootStackParamList, "Clientes">>()
+
     const [clientes, setClientes] = useState<Cliente[]>([])
     const [clientesInativos, setClientesInativos] = useState<Cliente[]>([])
     const [busca, setBusca] = useState("")
     const [filtro, setFiltro] = useState<Filtro>("todos")
+    const filtrosScrollRef = useRef<React.ComponentRef<typeof ScrollView>>(null)
     const [carregando, setCarregando] = useState(true)
     const [erro, setErro] = useState<string | null>(null)
     const [reativando, setReativando] = useState<string | null>(null)
@@ -143,6 +151,29 @@ export default function Clientes() {
             carregar()
         }, [carregar])
     )
+
+    // Recebe a solicitação para abrir a lista de clientes inativos
+    useEffect(() => {
+        if (route.params?.mostrarInativos) {
+            setFiltro("inativos")
+            navigation.setParams({ mostrarInativos: undefined })
+        }
+    }, [route.params?.mostrarInativos, navigation])
+
+    // Acompanha automaticamente o filtro selecionado na barra horizontal
+    useEffect(() => {
+        requestAnimationFrame(() => {
+            if (filtro === "inativos") {
+                filtrosScrollRef.current?.scrollToEnd({ animated: true })
+            } else if (filtro === "todos") {
+                filtrosScrollRef.current?.scrollTo({
+                    x: 0,
+                    y: 0,
+                    animated: true,
+                })
+            }
+        })
+    }, [filtro])
 
     // Escolhe qual lista será exibida
     const listaAtual = filtro === "inativos"
@@ -227,9 +258,17 @@ export default function Clientes() {
 
                 {/* Filtros com rolagem horizontal */}
                 <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    style={{ flexGrow: 0 }}
+                    ref={filtrosScrollRef}
+                    horizontal={true}
+                    directionalLockEnabled={true}
+                    nestedScrollEnabled={true}
+                    showsHorizontalScrollIndicator={true}
+                    bounces={false}
+                    style={{
+                        flexGrow: 0,
+                        flexShrink: 0,
+                        width: "100%",
+                    }}
                     contentContainerStyle={style.filtros}
                 >
                     <FiltroCliente

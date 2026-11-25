@@ -1,3 +1,4 @@
+
 export type Produto = {
     id: string
     nome: string
@@ -20,7 +21,7 @@ export type OpcaoCategoria = {
 export type UnidadePeso = "g" | "kg"
 
 export type Ingrediente = {
-    id: string          
+    id: string
     nome: string
     quantidade: number
     unidade: UnidadePeso
@@ -28,12 +29,13 @@ export type Ingrediente = {
 
 export type NovoProduto = {
     nome: string
-    categoria: string       
-    foto: string | null      
-    preco: number            
+    categoria: string
+    foto: string | null
+    preco: number
+    estoque: number
     descricao: string
-    preparo: string          
-    rendimento: string         
+    preparo: string
+    rendimento: string
     ingredientes: Omit<Ingrediente, "id">[]
     ativo: boolean
 }

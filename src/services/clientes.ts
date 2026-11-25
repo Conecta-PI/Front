@@ -17,6 +17,7 @@ type ClienteApi = {
 
 export type PedidoCliente = {
     id: string
+    chave: string
     data: string
     valor: number
     status: "Pago" | "Pendente"
@@ -27,7 +28,13 @@ type ResumoApi = {
     quantidadePedidos: number
     ultimoPedido: string | null
     temPendencia: boolean
-    pedidos: { id: number; data: string; valor: number; status: string }[]
+    pedidos: {
+        id: number
+        chave: string
+        data: string
+        valor: number
+        status: string
+    }[]
 }
 
 function mapearCliente({ id, observacoes, ...resto }: ClienteApi): Cliente {
@@ -74,6 +81,7 @@ export async function buscarDetalheCliente(
         }),
         pedidos: resumo.pedidos.map((pedido) => ({
             id: "#" + String(pedido.id).padStart(4, "0"),
+            chave: pedido.chave,
             data: formatarDataCurta(pedido.data),
             valor: pedido.valor,
             status: pedido.status === "pago" ? "Pago" : "Pendente",

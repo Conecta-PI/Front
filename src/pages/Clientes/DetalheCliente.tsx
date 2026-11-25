@@ -122,7 +122,7 @@ export default function DetalheCliente() {
         try {
             await excluirCliente(cliente!.id)
             setPopup((p) => ({ ...p, visivel: false }))
-            navigation.goBack()
+            navigation.replace("Clientes", { mostrarInativos: true })
         } catch (error) {
             setPopup({
                 visivel: true,
@@ -175,7 +175,7 @@ export default function DetalheCliente() {
 
                     <Text style={style.tituloSecao}>Histórico de pedidos</Text>
                     <View style={style.historico}>
-                        {pedidos.length > 0 ? pedidos.map((pedido) => <Pedido key={pedido.id} pedido={pedido} />) : (
+                        {pedidos.length > 0 ? pedidos.map((pedido) => <Pedido key={pedido.chave} pedido={pedido} />) : (
                             <Text style={style.mensagem}>Nenhum pedido encontrado.</Text>
                         )}
                     </View>

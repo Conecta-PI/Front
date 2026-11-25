@@ -15,6 +15,10 @@ export async function listarFornecedores(): Promise<Fornecedor[]> {
     return apiGet<Fornecedor[]>("/fornecedores")
 }
 
+export async function listarFornecedoresInativos(): Promise<Fornecedor[]> {
+    return apiGet<Fornecedor[]>("/fornecedores/inativos")
+}
+
 export async function buscarFornecedor(id: string | number): Promise<Fornecedor> {
     return apiGet<Fornecedor>(`/fornecedores/${encodeURIComponent(String(id))}`)
 }
@@ -29,4 +33,11 @@ export async function atualizarFornecedor(id: string | number, payload: Partial<
 
 export async function excluirFornecedor(id: string | number): Promise<void> {
     return apiDelete<void>(`/fornecedores/${encodeURIComponent(String(id))}`)
+}
+
+export async function reativarFornecedor(id: string | number): Promise<void> {
+    await apiPatch<void>(
+        `/fornecedores/${encodeURIComponent(String(id))}/reativar`,
+        {}
+    )
 }
