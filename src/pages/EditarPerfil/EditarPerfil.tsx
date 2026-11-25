@@ -13,17 +13,6 @@ import { resolverUrlImagem } from "../../services/api"
 import type { RootStackParamList } from "../../routes"
 import { style } from "./style"
 
-function lerComoDataUrl(uri: string): Promise<string> {
-    return fetch(uri)
-        .then((resposta) => resposta.blob())
-        .then((blob) => new Promise<string>((resolve, reject) => {
-            const leitor = new FileReader()
-            leitor.onloadend = () => resolve(String(leitor.result))
-            leitor.onerror = () => reject(leitor.error)
-            leitor.readAsDataURL(blob)
-        }))
-}
-
 export default function EditarPerfil() {
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>()
     const insets = useSafeAreaInsets()
@@ -33,6 +22,7 @@ export default function EditarPerfil() {
     const [telefone, setTelefone] = useState("")
     const [email, setEmail] = useState("")
     const [cnpj, setCnpj] = useState("")
+    const [cnpjOriginal, setCnpjOriginal] = useState("")
     const [chavePix, setChavePix] = useState("")
     const [foto, setFoto] = useState<string | null>(null)
     const [fotoOriginal, setFotoOriginal] = useState<string | null>(null)
@@ -49,7 +39,9 @@ export default function EditarPerfil() {
                 setNegocio(perfil.negocio ?? "")
                 setTelefone(perfil.telefone ?? "")
                 setEmail(perfil.email ?? "")
-                setCnpj(perfil.cnpj ?? "")
+                const cnpjCarregado = perfil.cnpj ?? ""
+                setCnpj(cnpjCarregado)
+                setCnpjOriginal(cnpjCarregado)
                 setChavePix(perfil.chavePix ?? "")
                 const fotoPerfil = resolverUrlImagem(perfil.foto) ?? null
                 setFoto(fotoPerfil)
@@ -75,8 +67,19 @@ export default function EditarPerfil() {
             setErro("Informe um e-mail válido")
             return
         }
-        if (cnpj.replace(/\D/g, "") && cnpj.replace(/\D/g, "").length !== 14) {
-            setErro("O CNPJ deve conter 14 números")
+        const cnpjNormalizado = cnpj.replace(/[^a-zA-Z0-9]/g, "").toUpperCase()
+        const cnpjOriginalNormalizado = cnpjOriginal
+            .replace(/[^a-zA-Z0-9]/g, "")
+            .toUpperCase()
+
+        const cnpjFoiAlterado = cnpjNormalizado !== cnpjOriginalNormalizado
+
+        if (
+            cnpjFoiAlterado &&
+            cnpjNormalizado !== "" &&
+            !/^[A-Z0-9]{12}[0-9]{2}$/.test(cnpjNormalizado)
+        ) {
+            setErro("O CNPJ deve conter 12 letras ou números e 2 números no final.")
             return
         }
 
@@ -85,12 +88,11 @@ export default function EditarPerfil() {
 
         try {
             let fotoParaEnviar: string | null | undefined
+
             if (foto === null) {
                 fotoParaEnviar = null
             } else if (foto !== fotoOriginal) {
-                fotoParaEnviar = foto.startsWith("data:") || foto.startsWith("http")
-                    ? foto
-                    : await lerComoDataUrl(foto)
+                fotoParaEnviar = foto
             } else {
                 fotoParaEnviar = undefined
             }
@@ -100,7 +102,7 @@ export default function EditarPerfil() {
                 negocio: negocio.trim(),
                 telefone: telefone.trim(),
                 email: email.trim(),
-                cnpj: cnpj.trim(),
+                ...(cnpjFoiAlterado ? { cnpj: cnpj.trim() } : {}),
                 chavePix: chavePix.trim(),
                 ...(fotoParaEnviar !== undefined ? { foto: fotoParaEnviar } : {}),
             })
@@ -125,7 +127,13 @@ export default function EditarPerfil() {
                         <Text style={style.estado}>Carregando perfil...</Text>
                     ) : (
                         <>
-                            <CampoFoto label="Foto de perfil" tituloModal="Foto de perfil" uri={foto} onChange={setFoto} />
+                            <CampoFoto
+                                label="Foto de perfil"
+                                tituloModal="Foto de perfil"
+                                uri={foto}
+                                onChange={setFoto}
+                                retornarDataUrl
+                            />
                             <Input tipo="texto" label="Nome" placeholder="Seu nome" value={nome} onChangeText={(valor) => { setNome(valor); setErro(null) }} />
                             <Input tipo="texto" label="Nome do negócio" placeholder="Nome do seu negócio" value={negocio} onChangeText={(valor) => { setNegocio(valor); setErro(null) }} />
                             <Input tipo="telefone" label="Telefone" placeholder="(00) 00000-0000" value={telefone} onChangeText={setTelefone} />

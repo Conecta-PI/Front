@@ -1,3 +1,4 @@
+
 import React, { useState } from "react"
 import { Text, View } from "react-native"
 import { useNavigation } from "@react-navigation/native"
@@ -21,17 +22,26 @@ export default function RecuperarSenha() {
 
     async function enviarCodigo() {
         const emailLimpo = email.trim()
+
         if (!EMAIL_VALIDO.test(emailLimpo)) {
             setErro("Informe um e-mail válido")
             return
         }
 
         setEnviando(true)
+
         try {
             const mensagem = await solicitarCodigoRecuperacao(emailLimpo)
-            navigation.navigate("CodigoSeguranca", { email: emailLimpo, mensagem })
+            navigation.navigate("CodigoSeguranca", {
+                email: emailLimpo,
+                mensagem,
+            })
         } catch (e) {
-            setErro(e instanceof Error ? e.message : "Não foi possível enviar o código.")
+            setErro(
+                e instanceof Error
+                    ? e.message
+                    : "Não foi possível enviar o código."
+            )
         } finally {
             setEnviando(false)
         }
@@ -40,9 +50,11 @@ export default function RecuperarSenha() {
     return (
         <View style={style.container}>
             <RecuperacaoHeader />
+
             <RecuperacaoCard>
                 <View style={style.introducao}>
                     <Text style={style.titulo}>Recuperar senha</Text>
+
                     <Text style={style.descricao}>
                         Informe o e-mail da sua conta para receber o código de verificação.
                     </Text>
@@ -60,7 +72,12 @@ export default function RecuperarSenha() {
                     erro={erro}
                 />
 
-                <Button texto={enviando ? "Enviando..." : "Enviar código"} onPress={enviarCodigo} />
+                <View style={style.botao}>
+                    <Button
+                        texto={enviando ? "Enviando..." : "Enviar código"}
+                        onPress={enviarCodigo}
+                    />
+                </View>
             </RecuperacaoCard>
         </View>
     )
