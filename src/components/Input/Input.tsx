@@ -1,3 +1,4 @@
+
 import React, { useState } from "react"
 import { Pressable, Text, TextInput, TextInputProps, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
@@ -14,6 +15,7 @@ export type InputTipo =
     | "telefone"
     | "moeda"
     | "decimal"
+    | "numero"
     | "data"
     | "hora"
     | "cnpj"
@@ -22,7 +24,7 @@ export type InputProps = Omit<TextInputProps, "secureTextEntry" | "keyboardType"
     tipo: InputTipo
     label?: string
     erro?: string
-    icone?: IconName  
+    icone?: IconName
 }
 
 function mascaraTelefone(valor: string) {
@@ -50,6 +52,10 @@ function mascaraDecimal(valor: string) {
     return resto.length > 0 ? `${inteiro},${resto.join("").slice(0, 3)}` : inteiro
 }
 
+function mascaraNumero(valor: string) {
+    return valor.replace(/\D/g, "").slice(0, 9)
+}
+
 function mascaraData(valor: string) {
     const d = valor.replace(/\D/g, "").slice(0, 8)
 
@@ -59,12 +65,15 @@ function mascaraData(valor: string) {
 }
 
 function mascaraCnpj(valor: string) {
-    const d = valor.replace(/\D/g, "").slice(0, 14)
+    const d = valor.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 14)
 
     if (d.length <= 2) return d
     if (d.length <= 5) return `${d.slice(0, 2)}.${d.slice(2)}`
     if (d.length <= 8) return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5)}`
-    if (d.length <= 12) return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5, 8)}/${d.slice(8)}`
+    if (d.length <= 12) {
+        return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5, 8)}/${d.slice(8)}`
+    }
+
     return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5, 8)}/${d.slice(8, 12)}-${d.slice(12)}`
 }
 
@@ -78,6 +87,7 @@ const MASCARAS: Partial<Record<InputTipo, (valor: string) => string>> = {
     telefone: mascaraTelefone,
     moeda: mascaraMoeda,
     decimal: mascaraDecimal,
+    numero: mascaraNumero,
     data: mascaraData,
     hora: mascaraHora,
     cnpj: mascaraCnpj,
@@ -117,6 +127,9 @@ function propsPorTipo(tipo: InputTipo, senhaVisivel: boolean): TextInputProps {
         case "decimal":
             return { keyboardType: "decimal-pad", maxLength: 10 }
 
+        case "numero":
+            return { keyboardType: "number-pad", maxLength: 9 }
+
         case "data":
             return { keyboardType: "number-pad", maxLength: 10 }
 
@@ -124,7 +137,13 @@ function propsPorTipo(tipo: InputTipo, senhaVisivel: boolean): TextInputProps {
             return { keyboardType: "number-pad", maxLength: 5 }
 
         case "cnpj":
-            return { keyboardType: "number-pad", maxLength: 18, autoComplete: "off" }
+            return {
+                keyboardType: "default",
+                autoCapitalize: "characters",
+                autoCorrect: false,
+                maxLength: 18,
+                autoComplete: "off",
+            }
 
         case "texto":
         default:

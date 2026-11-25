@@ -50,7 +50,7 @@ export type RootStackParamList = {
     Main: NavigatorScreenParams<RootTabParamList> | undefined
     Estoque: undefined
     Encomendas: undefined
-    Clientes: undefined
+    Clientes: { mostrarInativos?: boolean } | undefined
     DetalheCliente: { id: string }
     NovoProduto: { id?: string } | undefined
     DetalheEncomenda: { id: string }
@@ -68,9 +68,11 @@ export type RootStackParamList = {
 
 export type RootTabParamList = {
     Inicio: undefined
-    Produtos: undefined
+    Produtos: { mostrarInativos?: boolean } | undefined
     Cobrar: { produtoId?: string } | undefined
-    Pedidos: undefined
+    Pedidos: {
+        filtro?: "todos" | "pendente" | "pago" | "cancelado"
+    } | undefined
     Mais: undefined
 }
 

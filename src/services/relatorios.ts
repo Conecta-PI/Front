@@ -19,8 +19,10 @@ export async function buscarResumoRelatorios(): Promise<RelatorioResumo> {
     return apiGet<RelatorioResumo>("/relatorios/resumo")
 }
 
-export async function buscarVendasRelatorio(): Promise<RelatorioVenda[]> {
-    return apiGet<RelatorioVenda[]>("/relatorios/vendas")
+export async function buscarVendasRelatorio(
+    periodo: "hoje" | "semana" | "mes" | "ano" = "mes"
+): Promise<RelatorioVenda[]> {
+    return apiGet<RelatorioVenda[]>(`/relatorios/vendas?periodo=${encodeURIComponent(periodo)}`)
 }
 
 export async function buscarFinanceiroRelatorio(): Promise<Record<string, number | string>> {

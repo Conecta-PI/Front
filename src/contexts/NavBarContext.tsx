@@ -4,6 +4,7 @@ export type RodapeCobranca = {
     itens: number
     total: number
     desabilitado?: boolean
+    textoBotao?: string
     onCobrar: () => void
 }
 
@@ -14,7 +15,7 @@ type NavBarContextValue = {
 
 const NavBarContext = createContext<NavBarContextValue>({
     cobranca: null,
-    setCobranca: () => {},
+    setCobranca: () => { },
 })
 
 export function NavBarProvider({ children }: { children: ReactNode }) {

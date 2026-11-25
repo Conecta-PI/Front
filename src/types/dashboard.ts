@@ -1,5 +1,14 @@
+
 export type Periodo = "hoje" | "semana" | "mes"
-export type TipoAlerta = "critico" | "aviso" | "informativo"
+
+export type TipoAlerta =
+    | "critico"
+    | "aviso"
+    | "informativo"
+    | "pedidoPendente"
+    | "pedidoPago"
+    | "pedidoCancelado"
+
 export type TipoMetrica = "lucro" | "custo" | "investido"
 
 export type Dashboard = {

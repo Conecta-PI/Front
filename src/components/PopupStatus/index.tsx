@@ -1,3 +1,4 @@
+﻿
 import React from "react"
 import { Modal, Text, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
@@ -10,6 +11,7 @@ import FundoDesfocado from "../FundoDesfocado/"
 export type TipoPopup = "sucesso" | "erro" | "confirmacao"
 
 type IconName = React.ComponentProps<typeof Ionicons>["name"]
+type CorTema = keyof typeof themes.colors
 
 const CONFIG: Record<
     TipoPopup,
@@ -34,7 +36,7 @@ const CONFIG: Record<
         cor: themes.colors["erro"],
         fundo: themes.colors["fundo-de-erro"],
         botao: "Excluir",
-        solido: false,  
+        solido: false,
     },
 }
 
@@ -44,12 +46,14 @@ type PopupStatusProps = {
     titulo: string
     mensagem?: string
     textoBotao?: string
-    onFechar: () => void         
-    
+    onFechar: () => void
     textoConfirmar?: string
     textoCarregando?: string
     onConfirmar?: () => void
-    carregando?: boolean    
+    carregando?: boolean
+    iconeConfirmar?: IconName
+    corConfirmar?: CorTema
+    fundoConfirmar?: string
 }
 
 export default function PopupStatus({
@@ -63,8 +67,12 @@ export default function PopupStatus({
     textoCarregando = "Aguarde...",
     onConfirmar,
     carregando = false,
+    iconeConfirmar,
+    corConfirmar,
+    fundoConfirmar,
 }: PopupStatusProps) {
     const config = CONFIG[tipo]
+    console.log("[TESTE POPUPSTATUS]", { visivel, tipo, titulo })
 
     return (
         <Modal
@@ -81,29 +89,55 @@ export default function PopupStatus({
                 <FundoDesfocado />
 
                 <View style={style.card}>
-                    <View style={[style.anel, { backgroundColor: config.fundo }]}>
+                    <View
+                        style={[
+                            style.anel,
+                            {
+                                backgroundColor: fundoConfirmar ?? config.fundo,
+                            },
+                        ]}
+                    >
                         {config.solido ? (
                             <View style={[style.circulo, { backgroundColor: config.cor }]}>
-                                <Ionicons name={config.icone} size={22} color={themes.colors["branco"]} />
+                                <Ionicons
+                                    name={config.icone}
+                                    size={22}
+                                    color={themes.colors["branco"]}
+                                />
                             </View>
                         ) : (
-                            <Ionicons name={config.icone} size={26} color={config.cor} />
+                            <Ionicons
+                                name={iconeConfirmar ?? config.icone}
+                                size={26}
+                                color={
+                                    corConfirmar
+                                        ? themes.colors[corConfirmar]
+                                        : config.cor
+                                }
+                            />
                         )}
                     </View>
 
                     <Text style={style.titulo}>{titulo}</Text>
-                    {!!mensagem && <Text style={style.mensagem}>{mensagem}</Text>}
+                    {!!mensagem && (
+                        <Text style={style.mensagem}>{mensagem}</Text>
+                    )}
 
                     <View style={style.botoes}>
                         {tipo === "confirmacao" ? (
                             <>
                                 <Button
-                                    texto={carregando ? textoCarregando : textoConfirmar ?? config.botao}
-                                    cor="erro"
+                                    texto={
+                                        carregando
+                                            ? textoCarregando
+                                            : textoConfirmar ?? config.botao
+                                    }
+                                    cor={corConfirmar ?? "erro"}
                                     corTexto="branco"
                                     disabled={carregando}
                                     onPress={onConfirmar}
                                 />
+
                                 <Button
                                     texto="Cancelar"
                                     variante="contorno"
@@ -113,7 +147,10 @@ export default function PopupStatus({
                                 />
                             </>
                         ) : (
-                            <Button texto={textoBotao ?? config.botao} onPress={onFechar} />
+                            <Button
+                                texto={textoBotao ?? config.botao}
+                                onPress={onFechar}
+                            />
                         )}
                     </View>
                 </View>

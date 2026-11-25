@@ -11,13 +11,7 @@ function dataAtual() {
     return `${ano}-${mes}-${dia}T12:00:00`
 }
 
-let lancamentosDemonstrativos: FinanceiroLancamento[] = [
-    { id: -101, tipo: "entrada", valor: 320, categoria: "Venda", descricao: "Venda demonstrativa", data: dataAtual() },
-    { id: -102, tipo: "entrada", valor: 180, categoria: "Venda", descricao: "Venda demonstrativa", data: dataAtual() },
-    { id: -103, tipo: "saida", valor: 95, categoria: "Despesa", descricao: "Compra demonstrativa", data: dataAtual() },
-]
-
-let lancamentos: FinanceiroLancamento[] = [...lancamentosDemonstrativos]
+let lancamentos: FinanceiroLancamento[] = []
 
 export function obterLancamentosDashboard() {
     return lancamentos.map((item) => ({ ...item }))
@@ -39,9 +33,7 @@ export function registrarLancamentoDashboard(lancamento: Omit<FinanceiroLancamen
 }
 
 export function sincronizarLancamentosDashboard(lista: FinanceiroLancamento[]) {
-    lancamentos = lista.length > 0
-        ? lista.map((item) => ({ ...item }))
-        : [...lancamentosDemonstrativos]
+    lancamentos = lista.map((item) => ({ ...item }))
     notificar()
 }
 

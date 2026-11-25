@@ -14,9 +14,16 @@ type CampoFotoProps = {
     tituloModal?: string
     uri: string | null
     onChange: (uri: string | null) => void
+    retornarDataUrl?: boolean
 }
 
-export default function CampoFoto({ label, tituloModal = "Foto do produto", uri, onChange }: CampoFotoProps) {
+export default function CampoFoto({
+    label,
+    tituloModal = "Foto do produto",
+    uri,
+    onChange,
+    retornarDataUrl = false,
+}: CampoFotoProps) {
     const [aberto, setAberto] = useState(false)
 
     async function escolher(origem: "camera" | "galeria") {
@@ -40,6 +47,7 @@ export default function CampoFoto({ label, tituloModal = "Foto do produto", uri,
             allowsEditing: true,
             aspect: [4, 3],
             quality: 0.7,
+            base64: retornarDataUrl,
         }
 
         const resultado =
@@ -47,7 +55,24 @@ export default function CampoFoto({ label, tituloModal = "Foto do produto", uri,
                 ? await ImagePicker.launchCameraAsync(opcoes)
                 : await ImagePicker.launchImageLibraryAsync(opcoes)
 
-        if (!resultado.canceled) onChange(resultado.assets[0].uri)
+        if (resultado.canceled) return
+
+        const imagem = resultado.assets[0]
+
+        if (retornarDataUrl) {
+            if (!imagem.base64) {
+                Alert.alert(
+                    "Não foi possível carregar",
+                    "Não foi possível converter a imagem. Tente selecionar outra foto."
+                )
+                return
+            }
+
+            onChange(`data:image/jpeg;base64,${imagem.base64}`)
+            return
+        }
+
+        onChange(imagem.uri)
     }
 
     return (

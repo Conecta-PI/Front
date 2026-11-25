@@ -1,4 +1,4 @@
-// src/components/AlertaAtencao/AlertaAtencao.tsx
+
 import React from "react"
 import { Pressable, Text, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
@@ -17,27 +17,28 @@ type Config = {
     cor: string
     fundo: string
     destino: Destino
+    filtro?: "pendente" | "pago" | "cancelado"
     descricao: (n: number) => string
 }
 
 const CONFIG: Record<TipoAlerta, Config> = {
     critico: {
-        titulo: "Estoque baixo",
+        titulo: "Estoque crítico",
         icone: "warning-outline",
         cor: themes.colors["erro"],
         fundo: themes.colors["fundo-de-erro"],
         destino: "Estoque",
         descricao: (n) =>
-            n === 1 ? "1 item precisa ser reposto" : `${n} itens precisam ser repostos`,
+            n === 1 ? "1 item em situação crítica" : `${n} itens em situação crítica`,
     },
     aviso: {
-        titulo: "Pedidos pendentes",
+        titulo: "Estoque baixo",
         icone: "alert-circle-outline",
         cor: themes.colors["alerta"],
         fundo: themes.colors["fundo-de-alerta"],
-        destino: "Pedidos",
+        destino: "Estoque",
         descricao: (n) =>
-            n === 1 ? "1 pedido aguardando confirmação" : `${n} pedidos aguardando confirmação`,
+            n === 1 ? "1 item precisa ser reposto" : `${n} itens precisam ser repostos`,
     },
     informativo: {
         titulo: "Encomendas hoje",
@@ -48,6 +49,36 @@ const CONFIG: Record<TipoAlerta, Config> = {
         descricao: (n) =>
             n === 1 ? "1 entrega agendada para hoje" : `${n} entregas agendadas para hoje`,
     },
+    pedidoPendente: {
+        titulo: "Pedidos aguardando confirmação",
+        icone: "time-outline",
+        cor: themes.colors["alerta"],
+        fundo: themes.colors["fundo-de-alerta"],
+        destino: "Pedidos",
+        filtro: "pendente",
+        descricao: (n) =>
+            n === 1 ? "1 pedido pendente" : `${n} pedidos pendentes`,
+    },
+    pedidoPago: {
+        titulo: "Pedidos pagos",
+        icone: "checkmark-circle-outline",
+        cor: themes.colors["sucesso"],
+        fundo: themes.colors["fundo-de-sucesso"],
+        destino: "Pedidos",
+        filtro: "pago",
+        descricao: (n) =>
+            n === 1 ? "1 pedido pago" : `${n} pedidos pagos`,
+    },
+    pedidoCancelado: {
+        titulo: "Pedidos cancelados",
+        icone: "close-circle-outline",
+        cor: themes.colors["erro"],
+        fundo: themes.colors["fundo-de-erro"],
+        destino: "Pedidos",
+        filtro: "cancelado",
+        descricao: (n) =>
+            n === 1 ? "1 pedido cancelado" : `${n} pedidos cancelados`,
+    },
 }
 
 type AlertaAtencaoProps = {
@@ -56,7 +87,11 @@ type AlertaAtencaoProps = {
     encomendaHojeId?: string
 }
 
-export default function AlertaAtencao({ tipo, quantidade, encomendaHojeId }: AlertaAtencaoProps) {
+export default function AlertaAtencao({
+    tipo,
+    quantidade,
+    encomendaHojeId,
+}: AlertaAtencaoProps) {
     const navigation = useNavigation<NavigationProp<AppParamList>>()
     const config = CONFIG[tipo]
 
@@ -67,6 +102,12 @@ export default function AlertaAtencao({ tipo, quantidade, encomendaHojeId }: Ale
                     navigation.navigate("DetalheEncomenda", { id: encomendaHojeId })
                     return
                 }
+
+                if (config.filtro) {
+                    navigation.navigate("Pedidos", { filtro: config.filtro })
+                    return
+                }
+
                 navigation.dispatch(CommonActions.navigate(config.destino))
             }}
             accessibilityRole="button"
@@ -83,7 +124,11 @@ export default function AlertaAtencao({ tipo, quantidade, encomendaHojeId }: Ale
                 </Text>
             </View>
 
-            <Ionicons name="chevron-forward" size={20} color={themes.colors["marrom-suave"]} />
+            <Ionicons
+                name="chevron-forward"
+                size={20}
+                color={themes.colors["marrom-suave"]}
+            />
         </Pressable>
     )
 }
