@@ -42,11 +42,13 @@ export const style = StyleSheet.create({
     },
     datas: {
         flexDirection: "row",
-        gap: 6,
+        gap: 4,
         paddingVertical: 6,
+        justifyContent: "space-between",
     },
     data: {
         flex: 1,
+        minWidth: 0,
         height: 54,
         alignItems: "center",
         justifyContent: "center",
