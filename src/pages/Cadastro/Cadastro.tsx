@@ -1,8 +1,8 @@
-import React, { useRef, useState } from "react"
+import React, { useCallback, useRef, useState } from "react"
 import { KeyboardAvoidingView, ScrollView, Text, View } from "react-native"
 import type { ScrollViewInstance, ViewInstance } from "react-native"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
-import { useNavigation } from "@react-navigation/native"
+import { useFocusEffect, useNavigation } from "@react-navigation/native"
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
 
 import { style } from "./style"
@@ -12,6 +12,7 @@ import Button from "../../components/Button/Button"
 import Checkbox from "../../components/Checkbox/Checkbox"
 import type { RootStackParamList } from "../../routes"
 import { cadastrarResponsavel } from "../../services/auth"
+import { consumirAceiteTermos } from "../../services/termosUso"
 type CampoProps = InputProps & {
     aoFocar: (view: ViewInstance | null) => void
 }
@@ -47,6 +48,15 @@ export default function Cadastro() {
     const insets = useSafeAreaInsets()
     const navigation =
         useNavigation<NativeStackNavigationProp<RootStackParamList>>()
+
+    useFocusEffect(
+        useCallback(() => {
+            if (consumirAceiteTermos()) {
+                setAceito(true)
+                setErros((atuais) => ({ ...atuais, termos: undefined }))
+            }
+        }, [])
+    )
 
     const scrollRef = useRef<ScrollViewInstance>(null)
     const scrollY = useRef(0)
@@ -126,12 +136,7 @@ export default function Cadastro() {
     }
 
     function abrirTermos() {
-        navigation.navigate("TermosUso", {
-            onAceitar: () => {
-                setAceito(true)
-                setErros((e) => ({ ...e, termos: undefined }))
-            },
-        })
+        navigation.navigate("TermosUso")
     }
 
     function jaTenhoConta() {

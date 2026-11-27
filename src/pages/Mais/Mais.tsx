@@ -29,10 +29,10 @@ const MENU: { icone: IconName; texto: string; destino: Destino }[] = [
 
 export default function Mais() {
     const navigation = useNavigation<NavigationProp<AppParamList>>()
-    const { perfil, recarregarPerfil } = usePerfil()
+    const { perfil, carregando, erro, recarregarPerfil } = usePerfil()
 
     useFocusEffect(useCallback(() => {
-        recarregarPerfil().catch(() => undefined)
+        void recarregarPerfil()
     }, [recarregarPerfil]))
 
     async function sair() {
@@ -53,9 +53,14 @@ export default function Mais() {
                 onEditar: () => navigation.navigate("EditarPerfil"),
             }}
         >
-            {!perfil ? (
+            {!perfil && carregando ? (
                 <View style={style.carregando}>
                     <ActivityIndicator color={themes.colors["dourado"]} size="large" />
+                </View>
+            ) : !perfil ? (
+                <View style={style.carregando}>
+                    <Text style={style.erro}>{erro ?? "Não foi possível carregar o perfil."}</Text>
+                    <Button texto="Tentar novamente" onPress={() => void recarregarPerfil()} />
                 </View>
             ) : (
                 <ScrollView
@@ -129,4 +134,3 @@ export default function Mais() {
         </AppLayout>
     )
 }
-

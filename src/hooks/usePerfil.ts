@@ -1,26 +1,25 @@
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useState } from "react"
 import { buscarPerfil } from "../services/perfil"
 import type { Perfil } from "../types/perfil"
 
 export function usePerfil() {
     const [perfil, setPerfil] = useState<Perfil | null>(null)
+    const [carregando, setCarregando] = useState(false)
+    const [erro, setErro] = useState<string | null>(null)
 
     const recarregarPerfil = useCallback(async () => {
-        const dados = await buscarPerfil()
-        setPerfil(dados)
-    }, [])
+        setCarregando(true)
+        setErro(null)
 
-    useEffect(() => {
-        let cancelado = false
-
-        buscarPerfil().then((p) => {
-            if (!cancelado) setPerfil(p)
-        })
-
-        return () => {
-            cancelado = true
+        try {
+            const dados = await buscarPerfil()
+            setPerfil(dados)
+        } catch (error) {
+            setErro(error instanceof Error ? error.message : "Não foi possível carregar o perfil.")
+        } finally {
+            setCarregando(false)
         }
     }, [])
 
-    return { perfil, recarregarPerfil }
+    return { perfil, carregando, erro, recarregarPerfil }
 }

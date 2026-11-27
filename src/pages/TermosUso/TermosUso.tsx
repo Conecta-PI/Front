@@ -1,6 +1,6 @@
 import React from "react"
 import { ScrollView, Text, View } from "react-native"
-import { RouteProp, useNavigation, useRoute } from "@react-navigation/native"
+import { useNavigation } from "@react-navigation/native"
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
@@ -8,14 +8,14 @@ import { style } from "./style"
 import AppLayout from "../../components/AppLayout/AppLayout"
 import Button from "../../components/Button/Button"
 import type { RootStackParamList } from "../../routes"
+import { registrarAceiteTermos } from "../../services/termosUso"
 
 export default function TermosUso() {
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>()
-    const route = useRoute<RouteProp<RootStackParamList, "TermosUso">>()
     const insets = useSafeAreaInsets()
 
     function aceitar() {
-        route.params.onAceitar()
+        registrarAceiteTermos()
         navigation.goBack()
     }
 

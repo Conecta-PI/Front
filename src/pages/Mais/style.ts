@@ -6,6 +6,13 @@ export const style = StyleSheet.create({
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
+        gap: 12,
+        padding: 24,
+    },
+    erro: {
+        ...themes.typography.apoio,
+        color: themes.colors.erro,
+        textAlign: "center",
     },
     conteudo: {
         padding: 16,

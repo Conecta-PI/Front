@@ -42,7 +42,7 @@ export type RootStackParamList = {
     Abertura: undefined
     Onboarding: undefined
     Login: undefined
-    Cadastro: undefined
+    Cadastro: { termosAceitos?: boolean } | undefined
     RecuperarSenha: undefined
     CodigoSeguranca: { email: string; mensagem?: string }
     NovaSenha: { email: string; codigo: string }
@@ -62,7 +62,7 @@ export type RootStackParamList = {
     Relatorios: undefined
     Configuracoes: undefined
     NovaEncomenda: { clienteId: string; clienteNome: string }
-    TermosUso: { onAceitar: () => void }
+    TermosUso: undefined
     EditarPerfil: undefined
 }
 
